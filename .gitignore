@@ -1,0 +1,40 @@
+# =========================
+# Visual Studio / .NET
+# =========================
+.vs/
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.dbmdl
+*.cache
+*.log
+*.tlog
+*.pdb
+
+# Publish output
+publish/
+out/
+*.Publish.xml
+
+# Environment files
+appsettings.Development.json
+appsettings.Local.json
+.env
+
+# =========================
+# IDE / Tools
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*.bak
+
+# =========================
+# OS-specific
+# =========================
+Thumbs.db
+.DS_Store
