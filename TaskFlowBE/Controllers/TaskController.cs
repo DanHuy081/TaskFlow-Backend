@@ -29,27 +29,15 @@ namespace TaskFlowBE.API.Controllers
             _context = context;
         }
 
-        [HttpGet] // Xử lý HTTP GET request
-        [ProducesResponseType(typeof(IEnumerable<TaskFL>), 200)] // Thông báo kiểu trả về thành công
-        public async Task<IActionResult> GetAllTasks()
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<TaskFL>>> GetAll()
         {
-            try
-            {
-                // Chỉ cần gọi BLL, BLL sẽ lo phần còn lại
-                var tasks = await _taskService.GetAllTasksAsync();
-
-                // Trả về HTTP 200 OK cùng với danh sách DTO
-                return Ok(tasks);
-            }
-            catch (Exception ex)
-            {
-                // Xử lý lỗi chung
-                return StatusCode(500, "Đã xảy ra lỗi máy chủ nội bộ.");
-            }
+            var tasks = await _taskService.GetAllTasksAsync();
+            return Ok(tasks);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<ActionResult<TaskFL>> GetById(string id)
         {
             var task = await _taskService.GetTaskByIdAsync(id);
             if (task == null) return NotFound();
@@ -57,33 +45,25 @@ namespace TaskFlowBE.API.Controllers
         }
 
         [HttpPost]
-        [Consumes("application/x-www-form-urlencoded")]
-        public async Task<IActionResult> CreateTask([FromBody] TaskDto dto)
+        public async Task<ActionResult> Create(TaskFL task)
         {
-            var task = _mapper.Map<TaskFL>(dto); // Map từ DTO sang Entity
-
-            _context.Tasks.Add(task);
-            await _context.SaveChangesAsync();
-
-            var result = _mapper.Map<TaskDto>(task); // Map ngược lại nếu muốn trả ra DTO
-            return Ok(result);
+            await _taskService.CreateTaskAsync(task);
+            return CreatedAtAction(nameof(GetById), new { id = task.Id }, task);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] TaskFL task)
+        public async Task<ActionResult> Update(string id, TaskFL task)
         {
-            if (id != task.Id) return BadRequest("ID mismatch.");
-            var updated = await _taskService.UpdateTaskAsync(task);
-            if (updated == null) return NotFound();
-            return Ok(updated);
+            if (id != task.Id) return BadRequest();
+            await _taskService.UpdateTaskAsync(task);
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<ActionResult> Delete(string id)
         {
-            var result = await _taskService.DeleteTaskAsync(id);
-            if (!result) return NotFound();
-            return Ok("Deleted successfully.");
+            await _taskService.DeleteTaskAsync(id);
+            return NoContent();
         }
     }
 }

@@ -17,44 +17,36 @@ namespace SqlServer
         {
             _context = context;
         }
-        public async Task<IEnumerable<TaskFL>> GetAllTasksAsync()
+        public async Task<IEnumerable<TaskFL>> GetAllAsync()
         {
-            // Lấy tất cả Task từ CSDL
-            // AsNoTracking() giúp tăng hiệu suất cho các truy vấn chỉ đọc
-            return await _context.Tasks.AsNoTracking().ToListAsync();
+            return await _context.Tasks.ToListAsync();
         }
 
-        public async Task<TaskFL> GetByIdAsync(int id)
+        public async Task<TaskFL> GetByIdAsync(string id)
         {
             return await _context.Tasks.FindAsync(id);
         }
 
-
-        public async Task<TaskFL> CreateTaskAsync(TaskFL task)
+        public async Task AddAsync(TaskFL task)
         {
-            _context.Tasks.Add(task);
+            await _context.Tasks.AddAsync(task);
             await _context.SaveChangesAsync();
-            return task;
         }
 
-        public async Task<TaskFL> UpdateAsync(TaskFL task)
+        public async Task UpdateAsync(TaskFL task)
         {
-            var existing = await _context.Tasks.FindAsync(task.Id);
-            if (existing == null) return null;
-
-            _context.Entry(existing).CurrentValues.SetValues(task);
+            _context.Tasks.Update(task);
             await _context.SaveChangesAsync();
-            return existing;
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task DeleteAsync(string id)
         {
             var task = await _context.Tasks.FindAsync(id);
-            if (task == null) return false;
-
-            _context.Tasks.Remove(task);
-            await _context.SaveChangesAsync();
-            return true;
+            if (task != null)
+            {
+                _context.Tasks.Remove(task);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }

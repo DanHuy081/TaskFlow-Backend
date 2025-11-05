@@ -18,20 +18,39 @@ namespace LogicBusiness.Service
             _repository = repository;
         }
 
-        public Task<IEnumerable<Comment>> GetCommentsByTaskIdAsync(int taskId)
-            => _repository.GetCommentsByTaskIdAsync(taskId);
+        public async Task<IEnumerable<Comment>> GetAllCommentsAsync()
+        {
+            return await _repository.GetAllAsync();
+        }
 
-        public Task<Comment?> GetCommentByIdAsync(int id)
-            => _repository.GetCommentByIdAsync(id);
+        public async Task<Comment> GetCommentByIdAsync(string id)
+        {
+            return await _repository.GetByIdAsync(id);
+        }
 
-        public Task<Comment> AddCommentAsync(Comment comment)
-            => _repository.AddCommentAsync(comment);
+        public async Task<IEnumerable<Comment>> GetCommentsByTaskIdAsync(string taskId)
+        {
+            return await _repository.GetByTaskIdAsync(taskId);
+        }
 
-        public Task<Comment> UpdateCommentAsync(Comment comment)
-            => _repository.UpdateCommentAsync(comment);
+        public async Task AddCommentAsync(Comment comment)
+        {
+            comment.CommentId = Guid.NewGuid().ToString();
+            comment.DateCreated = DateTime.UtcNow;
+            await _repository.AddAsync(comment);
+        }
 
-        public Task<bool> DeleteCommentAsync(int id)
-            => _repository.DeleteCommentAsync(id);
+        public async Task UpdateCommentAsync(Comment comment)
+        {
+            comment.DateUpdated = DateTime.UtcNow;
+            comment.IsEdited = true;
+            await _repository.UpdateAsync(comment);
+        }
+
+        public async Task DeleteCommentAsync(string id)
+        {
+            await _repository.DeleteAsync(id);
+        }
     }
 }
 

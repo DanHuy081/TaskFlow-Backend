@@ -9,10 +9,11 @@ namespace LogicBusiness.UseCase
 {
     public interface ICommentService
     {
-        Task<IEnumerable<Comment>> GetCommentsByTaskIdAsync(int taskId);
-        Task<Comment?> GetCommentByIdAsync(int id);
-        Task<Comment> AddCommentAsync(Comment comment);
-        Task<Comment> UpdateCommentAsync(Comment comment);
-        Task<bool> DeleteCommentAsync(int id);
+        Task<IEnumerable<Comment>> GetAllCommentsAsync();
+        Task<Comment> GetCommentByIdAsync(string id);
+        Task<IEnumerable<Comment>> GetCommentsByTaskIdAsync(string taskId);
+        Task AddCommentAsync(Comment comment);
+        Task UpdateCommentAsync(Comment comment);
+        Task DeleteCommentAsync(string id);
     }
 }

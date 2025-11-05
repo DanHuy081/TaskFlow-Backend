@@ -16,43 +16,50 @@ namespace TaskFlowBE.Controllers
             _service = service;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var comments = await _service.GetAllCommentsAsync();
+            return Ok(comments);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(string id)
+        {
+            var comment = await _service.GetCommentByIdAsync(id);
+            if (comment == null)
+                return NotFound();
+            return Ok(comment);
+        }
+
         [HttpGet("task/{taskId}")]
-        public async Task<IActionResult> GetCommentsByTaskId(int taskId)
+        public async Task<IActionResult> GetByTaskId(string taskId)
         {
             var comments = await _service.GetCommentsByTaskIdAsync(taskId);
             return Ok(comments);
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetCommentById(int id)
-        {
-            var comment = await _service.GetCommentByIdAsync(id);
-            if (comment == null) return NotFound();
-            return Ok(comment);
-        }
-
         [HttpPost]
-        public async Task<IActionResult> AddComment([FromBody] Comment comment)
+        public async Task<IActionResult> Create([FromBody] Comment comment)
         {
-            var created = await _service.AddCommentAsync(comment);
-            return CreatedAtAction(nameof(GetCommentById), new { id = created.Id }, created);
+            await _service.AddCommentAsync(comment);
+            return CreatedAtAction(nameof(GetById), new { id = comment.CommentId }, comment);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateComment(int id, [FromBody] Comment comment)
+        public async Task<IActionResult> Update(string id, [FromBody] Comment comment)
         {
-            if (id != comment.Id)
-                return BadRequest("CommentId mismatch");
+            if (id != comment.CommentId)
+                return BadRequest("ID mismatch.");
 
-            var updated = await _service.UpdateCommentAsync(comment);
-            return Ok(updated);
+            await _service.UpdateCommentAsync(comment);
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteComment(int id)
+        public async Task<IActionResult> Delete(string id)
         {
-            var deleted = await _service.DeleteCommentAsync(id);
-            if (!deleted) return NotFound();
+            await _service.DeleteCommentAsync(id);
             return NoContent();
         }
     }

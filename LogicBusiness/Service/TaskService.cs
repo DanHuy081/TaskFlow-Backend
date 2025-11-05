@@ -23,78 +23,30 @@ namespace LogicBusiness.Service
         }
         public async Task<IEnumerable<TaskFL>> GetAllTasksAsync()
         {
-            // 1. Gọi DAL để lấy dữ liệu Entity
-            var tasksFromDb = await _taskRepository.GetAllTasksAsync();
-
-  
-            var taskDtos = tasksFromDb.Select(task => new TaskFL
-            {
-                Id = task.Id,
-                ProjectId = task.ProjectId,
-                Title = task.Title,
-                Description = task.Description,
-                AssignedTo = task.AssignedTo,
-                CreatedBy = task.CreatedBy,
-                Status = task.Status,
-                Priority = task.Priority,
-                StartDate = task.StartDate,
-                DueDate = task.DueDate,
-                Progress = task.Progress,
-                CreatedAt = task.CreatedAt,
-                UpdatedAt = task.UpdatedAt
-            });
-
-            return taskDtos;
+            return await _taskRepository.GetAllAsync();
         }
 
-        public async Task<TaskFL> GetTaskByIdAsync(int id)
+        public async Task<TaskFL> GetTaskByIdAsync(string id)
         {
             return await _taskRepository.GetByIdAsync(id);
         }
-        public async Task<TaskDto> CreateTaskAsync(TaskDto taskDto)
+
+        public async Task CreateTaskAsync(TaskFL task)
         {
-            var task = new TaskFL
-            {
-                Title = taskDto.Title,
-                Description = taskDto.Description,
-                ProjectId = taskDto.ProjectId,
-                AssignedTo = taskDto.AssignedTo,
-                Status = taskDto.Status,
-                Priority = taskDto.Priority,
-                Progress = taskDto.Progress,
-                StartDate = taskDto.StartDate,
-                DueDate = taskDto.DueDate,
-                CreatedBy = taskDto.CreatedBy,
-                CreatedAt = DateTime.Now
-            };
-
-            var created = await _taskRepository.CreateTaskAsync(task);
-
-            return new TaskDto
-            {
-                Id = created.Id,
-                Title = created.Title,
-                Description = created.Description,
-                ProjectId = created.ProjectId,
-                AssignedTo = created.AssignedTo,
-                Status = created.Status,
-                Priority = created.Priority,
-                Progress = created.Progress,
-                StartDate = created.StartDate,
-                DueDate = created.DueDate,
-                CreatedBy = created.CreatedBy
-            };
+            task.Id = Guid.NewGuid().ToString();
+            task.DateCreated = System.DateTime.UtcNow;
+            await _taskRepository.AddAsync(task);
         }
 
-        public async Task<TaskFL> UpdateTaskAsync(TaskFL task)
+        public async Task UpdateTaskAsync(TaskFL task)
         {
-            task.UpdatedAt = DateTime.Now;
-            return await _taskRepository.UpdateAsync(task);
+            task.DateUpdated = System.DateTime.UtcNow;
+            await _taskRepository.UpdateAsync(task);
         }
 
-        public async Task<bool> DeleteTaskAsync(int id)
+        public async Task DeleteTaskAsync(string id)
         {
-            return await _taskRepository.DeleteAsync(id);
+            await _taskRepository.DeleteAsync(id);
         }
     }
 }

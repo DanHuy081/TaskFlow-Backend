@@ -19,43 +19,44 @@ namespace SqlServer
             _context = context;
         }
 
-        public async Task<IEnumerable<Comment>> GetCommentsByTaskIdAsync(int taskId)
+        public async Task<IEnumerable<Comment>> GetAllAsync()
         {
-            return await _context.Comments
-                .Where(c => c.TaskId == taskId)
-                .OrderByDescending(c => c.CreatedAt)
-                .ToListAsync();
+            return await _context.Comments.ToListAsync();
         }
 
-        public async Task<Comment?> GetCommentByIdAsync(int id)
+        public async Task<Comment> GetByIdAsync(string id)
         {
             return await _context.Comments.FindAsync(id);
         }
 
-        public async Task<Comment> AddCommentAsync(Comment comment)
+        public async Task<IEnumerable<Comment>> GetByTaskIdAsync(string taskId)
         {
-            comment.CreatedAt = DateTime.UtcNow;
-            _context.Comments.Add(comment);
-            await _context.SaveChangesAsync();
-            return comment;
+            return await _context.Comments
+                .Where(c => c.TaskId == taskId)
+                .OrderByDescending(c => c.DateCreated)
+                .ToListAsync();
         }
 
-        public async Task<Comment> UpdateCommentAsync(Comment comment)
+        public async Task AddAsync(Comment comment)
+        {
+            _context.Comments.Add(comment);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateAsync(Comment comment)
         {
             _context.Comments.Update(comment);
             await _context.SaveChangesAsync();
-            return comment;
         }
 
-        public async Task<bool> DeleteCommentAsync(int id)
+        public async Task DeleteAsync(string id)
         {
-            var comment = await _context.Comments.FindAsync(id);
-            if (comment == null)
-                return false;
-
-            _context.Comments.Remove(comment);
-            await _context.SaveChangesAsync();
-            return true;
+            var c = await _context.Comments.FindAsync(id);
+            if (c != null)
+            {
+                _context.Comments.Remove(c);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }
