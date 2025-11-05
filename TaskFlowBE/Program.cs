@@ -9,6 +9,7 @@ using LogicBusiness.Service;
 using LogicBusiness.UseCase;
 using LogicBusiness.Repository;
 using SqlServer;
+using SqlServer.Mapping;
 
 
 
@@ -69,6 +70,10 @@ builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<ITaskRepository, TaskRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddScoped<ITagRepository, TagRepository>();
+builder.Services.AddScoped<ITagService, TagService>();
+builder.Services.AddScoped<ITaskTagRepository, TaskTagRepository>();
+builder.Services.AddScoped<ITaskTagService, TaskTagService>();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
