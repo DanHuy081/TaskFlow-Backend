@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CoreEntities.Model;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.SqlServer;
 
 namespace TaskFlowBE.Data
 {
@@ -17,5 +18,17 @@ namespace TaskFlowBE.Data
 
         public DbSet<User> Users { get; set; }
         public DbSet<TaskFL> Tasks { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // Đảm bảo Task có khóa chính
+            modelBuilder.Entity<TaskFL>()
+                .HasKey(t => t.Id);
+
+            
+        }
     }
 }

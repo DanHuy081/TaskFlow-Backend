@@ -9,10 +9,10 @@ namespace LogicBusiness.Repository
 {
     public interface ITaskRepository
     {
-        Task<IEnumerable<TaskFL>> GetAllTasksAsync();
-        Task<TaskFL> GetByIdAsync(int id);
-        Task<TaskFL> CreateTaskAsync(TaskFL task);
-        Task<TaskFL> UpdateAsync(TaskFL task);
-        Task<bool> DeleteAsync(int id);
+        Task<IEnumerable<TaskFL>> GetAllAsync();
+        Task<TaskFL> GetByIdAsync(string id);
+        Task AddAsync(TaskFL task);
+        Task UpdateAsync(TaskFL task);
+        Task DeleteAsync(string id);
     }
 }

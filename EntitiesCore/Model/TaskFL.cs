@@ -4,33 +4,59 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CoreEntities.Model
 {
+    [Table("Tasks")]
     public class TaskFL
     {
-        [Column("id")]
-        public int Id { get; set; }
-        [Column("projectid")]
-        public int ProjectId { get; set; }
-        [Column("title")]
-        public string? Title { get; set; }
-        [Column("description")]
+        [Key]
+        [Column("Id")]
+        public string Id { get; set; }
+
+        [Column("ListId")]
+        public string? ListId { get; set; }
+
+        [Column("ParentTaskId")]
+        public string? ParentTaskId { get; set; }
+
+        [Column("Name")]
+        public string? Name { get; set; }
+
+        [Column("Description")]
         public string? Description { get; set; }
-        [Column("AssignedTo")]
-        public int? AssignedTo { get; set; }
-        [Column("createdby")]
-        public int? CreatedBy { get; set; }
-        [Column("status")]
+
+        [Column("Status")]
         public string? Status { get; set; }
-        [Column("priority")]
+
+        [Column("Priority")]
         public string? Priority { get; set; }
-        [Column("startdate")]
-        public DateTime? StartDate { get; set; }
-        [Column("duedate")]
+
+        [Column("DueDate")]
         public DateTime? DueDate { get; set; }
-        [Column("progress")]
-        public int? Progress { get; set; }
-        [Column("createdat")]
-        public DateTime? CreatedAt { get; set; }
-        [Column("updatedat")]
-        public DateTime? UpdatedAt { get; set; }
+
+        [Column("StartDate")]
+        public DateTime? StartDate { get; set; }
+
+        [Column("TimeEstimate")]
+        public long? TimeEstimate { get; set; }
+
+        [Column("TimeSpent")]
+        public long? TimeSpent { get; set; }
+
+        [Column("CreatorId")]
+        public string? CreatorId { get; set; }
+
+        [Column("DateCreated")]
+        public DateTime? DateCreated { get; set; }
+
+        [Column("DateUpdated")]
+        public DateTime? DateUpdated { get; set; }
+
+        [Column("DateClosed")]
+        public DateTime? DateClosed { get; set; }
+
+        [Column("IsArchived")]
+        public bool? IsArchived { get; set; }
+
+        [Column("Url")]
+        public string? Url { get; set; }
     }
 }
