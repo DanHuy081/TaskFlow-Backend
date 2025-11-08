@@ -13,8 +13,6 @@ namespace CoreEntities.Model
     {
        
         public string TaskId { get; set; }
-
-        
         public string TagId { get; set; }
     }
 }
