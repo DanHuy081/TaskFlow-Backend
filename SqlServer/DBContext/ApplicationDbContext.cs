@@ -31,8 +31,6 @@ namespace TaskFlowBE.Data
                 .HasKey(t => t.Id);
             modelBuilder.Entity<TaskTag>()
                 .HasKey(tt => new { tt.TaskId, tt.TagId });
-        
-
-    }
+        }
     }
 }
