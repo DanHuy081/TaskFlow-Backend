@@ -10,43 +10,43 @@ using TaskFlowBE.Data;
 
 namespace SqlServer
 {
-    public class ListRepository : IListRepository
+    public class FolderRepository : IFolderRepository
     {
         private readonly ApplicationDbContext _context;
 
-        public ListRepository(ApplicationDbContext context)
+        public FolderRepository(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        public async Task<IEnumerable<List>> GetAllAsync()
+        public async Task<IEnumerable<Folder>> GetAllAsync()
         {
-            return await _context.Lists.ToListAsync();
+            return await _context.Folders.ToListAsync();
         }
 
-        public async Task<List> GetByIdAsync(string id)
+        public async Task<Folder> GetByIdAsync(string id)
         {
-            return await _context.Lists.FindAsync(id);
+            return await _context.Folders.FindAsync(id);
         }
 
-        public async Task AddAsync(List list)
+        public async Task AddAsync(Folder folder)
         {
-            _context.Lists.Add(list);
+            _context.Folders.Add(folder);
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(List list)
+        public async Task UpdateAsync(Folder folder)
         {
-            _context.Lists.Update(list);
+            _context.Folders.Update(folder);
             await _context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(string id)
         {
-            var list = await _context.Lists.FindAsync(id);
-            if (list != null)
+            var folder = await _context.Folders.FindAsync(id);
+            if (folder != null)
             {
-                _context.Lists.Remove(list);
+                _context.Folders.Remove(folder);
                 await _context.SaveChangesAsync();
             }
         }
