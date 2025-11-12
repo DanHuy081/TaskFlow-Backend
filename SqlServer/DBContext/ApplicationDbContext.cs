@@ -22,6 +22,7 @@ namespace TaskFlowBE.Data
         public DbSet<Tag> Tags { get; set; }
         public DbSet<TaskTag> TaskTags { get; set; }
         public DbSet<Attachment> Attachments { get; set; }
+        public DbSet<ListFL> Lists { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
