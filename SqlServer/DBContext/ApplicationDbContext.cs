@@ -21,6 +21,7 @@ namespace TaskFlowBE.Data
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<TaskTag> TaskTags { get; set; }
+        public DbSet<Attachment> Attachments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -31,6 +32,17 @@ namespace TaskFlowBE.Data
                 .HasKey(t => t.Id);
             modelBuilder.Entity<TaskTag>()
                 .HasKey(tt => new { tt.TaskId, tt.TagId });
+
+
+            // --- Cấu hình cho bảng Comments ---
+            modelBuilder.Entity<TaskFL>()
+            .HasKey(t => t.Id);
+
+            modelBuilder.Entity<TaskFL>()
+                .HasMany(t => t.Comments)
+                .WithOne(c => c.Task)
+                .HasForeignKey(c => c.TaskId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
