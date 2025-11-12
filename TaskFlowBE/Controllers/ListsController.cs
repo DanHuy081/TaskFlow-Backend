@@ -31,14 +31,14 @@ namespace TaskFlowBE.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] ListFL list)
+        public async Task<IActionResult> Create([FromBody] List list)
         {
             await _service.AddAsync(list);
             return Ok(list);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(string id, [FromBody] ListFL list)
+        public async Task<IActionResult> Update(string id, [FromBody] List list)
         {
             if (id != list.ListId) return BadRequest("Mismatched ID");
             await _service.UpdateAsync(list);

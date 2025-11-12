@@ -22,7 +22,7 @@ namespace TaskFlowBE.Data
         public DbSet<Tag> Tags { get; set; }
         public DbSet<TaskTag> TaskTags { get; set; }
         public DbSet<Attachment> Attachments { get; set; }
-        public DbSet<ListFL> Lists { get; set; }
+        public DbSet<List> Lists { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -44,6 +44,16 @@ namespace TaskFlowBE.Data
                 .WithOne(c => c.Task)
                 .HasForeignKey(c => c.TaskId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Attachment>()
+                .HasOne(a => a.Task)
+                .WithMany(t => t.Attachments)
+                .HasForeignKey(a => a.TaskId);
+
+            modelBuilder.Entity<TaskFL>()
+                .HasOne(t => t.List)
+                .WithMany(l => l.Tasks)
+                .HasForeignKey(t => t.ListId);
         }
     }
 }

@@ -9,10 +9,10 @@ namespace LogicBusiness.UseCase
 {
     public interface IListService
     {
-        Task<IEnumerable<ListFL>> GetAllAsync();
-        Task<ListFL> GetByIdAsync(string id);
-        Task AddAsync(ListFL list);
-        Task UpdateAsync(ListFL list);
+        Task<IEnumerable<List>> GetAllAsync();
+        Task<List> GetByIdAsync(string id);
+        Task AddAsync(List list);
+        Task UpdateAsync(List list);
         Task DeleteAsync(string id);
     }
 }
