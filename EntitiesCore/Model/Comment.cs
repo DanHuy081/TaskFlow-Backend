@@ -15,7 +15,7 @@ namespace CoreEntities.Model
         public string CommentId { get; set; }
 
         [Column("TaskId")]
-        public string TaskId { get; set; }
+        public string? TaskId { get; set; }
 
         [Column("UserId")]
         public string UserId { get; set; }
@@ -31,5 +31,7 @@ namespace CoreEntities.Model
 
         [Column("DateUpdated")]
         public DateTime? DateUpdated { get; set; }
+        public TaskFL Task { get; set; }
+       
     }
 }

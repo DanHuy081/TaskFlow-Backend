@@ -58,6 +58,7 @@ namespace CoreEntities.Model
 
         [Column("Url")]
         public string? Url { get; set; }
-        
+
+        public ICollection<Comment> Comments { get; set; }
     }
 }
