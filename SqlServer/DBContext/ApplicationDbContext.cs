@@ -24,6 +24,7 @@ namespace TaskFlowBE.Data
         public DbSet<Attachment> Attachments { get; set; }
         public DbSet<List> Lists { get; set; }
         public DbSet<Folder> Folders { get; set; }
+        public DbSet<Space> Spaces { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
