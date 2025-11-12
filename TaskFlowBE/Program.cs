@@ -80,6 +80,8 @@ builder.Services.AddScoped<IListRepository, ListRepository>();
 builder.Services.AddScoped<IListService, ListService>();
 builder.Services.AddScoped<IFolderRepository, FolderRepository>();
 builder.Services.AddScoped<IFolderService, FolderService>();
+builder.Services.AddScoped<ISpaceRepository, SpaceRepository>();
+builder.Services.AddScoped<ISpaceService, SpaceService>();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
