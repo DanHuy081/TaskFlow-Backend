@@ -60,5 +60,7 @@ namespace CoreEntities.Model
         public string? Url { get; set; }
 
         public ICollection<Comment> Comments { get; set; }
+        public ICollection<Attachment> Attachments { get; set; }
+        public List List { get; set; }
     }
 }

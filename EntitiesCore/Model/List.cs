@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace CoreEntities.Model
 {
     [Table("Lists")]
-    public class ListFL
+    public class List
     {
         [Key]
         [Column("ListId")]

@@ -18,24 +18,24 @@ namespace LogicBusiness.Service
             _repo = repo;
         }
 
-        public async Task<IEnumerable<ListFL>> GetAllAsync()
+        public async Task<IEnumerable<List>> GetAllAsync()
         {
             return await _repo.GetAllAsync();
         }
 
-        public async Task<ListFL> GetByIdAsync(string id)
+        public async Task<List> GetByIdAsync(string id)
         {
             return await _repo.GetByIdAsync(id);
         }
 
-        public async Task AddAsync(ListFL list)
+        public async Task AddAsync(List list)
         {
             list.ListId = Guid.NewGuid().ToString();
             list.DateCreated = DateTime.UtcNow;
             await _repo.AddAsync(list);
         }
 
-        public async Task UpdateAsync(ListFL list)
+        public async Task UpdateAsync(List list)
         {
             list.DateUpdated = DateTime.UtcNow;
             await _repo.UpdateAsync(list);
