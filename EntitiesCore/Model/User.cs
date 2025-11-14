@@ -10,12 +10,14 @@ namespace CoreEntities.Model
 {
     public class User
     {
-        public int UserId { get; set; }              // Khóa chính
+        public string UserId { get; set; }              // Khóa chính
         public string? FullName { get; set; }     // Tên đăng nhập
         public string? Email { get; set; }        // Email
         public string? PasswordHash { get; set; } // Mật khẩu đã mã hóa
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        
+
+        public ICollection<TeamMember> TeamMembers { get; set; } = new List<TeamMember>();
+
     }
 
     public class UserRegisterDto
