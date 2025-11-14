@@ -23,7 +23,7 @@ namespace SqlServer
         {
             return await _context.TeamMembers
                 .Include(tm => tm.Teams)
-                .Include(tm => tm.Users)
+                .Include(tm => tm.UserFLs)
                 .ToListAsync();
         }
 
@@ -31,7 +31,7 @@ namespace SqlServer
         {
             return await _context.TeamMembers
                 .Where(tm => tm.TeamId == teamId)
-                .Include(tm => tm.Users)
+                .Include(tm => tm.UserFLs)
                 .ToListAsync();
         }
 
