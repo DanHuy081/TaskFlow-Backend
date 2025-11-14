@@ -25,6 +25,8 @@ namespace TaskFlowBE.Data
         public DbSet<List> Lists { get; set; }
         public DbSet<Folder> Folders { get; set; }
         public DbSet<Space> Spaces { get; set; }
+        public DbSet<Team> Teams { get; set; }
+        public DbSet<TeamMember> TeamMembers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -56,6 +58,19 @@ namespace TaskFlowBE.Data
                 .HasOne(t => t.List)
                 .WithMany(l => l.Tasks)
                 .HasForeignKey(t => t.ListId);
+
+            modelBuilder.Entity<TeamMember>()
+                .HasKey(tm => new { tm.TeamId, tm.UserId });
+
+            modelBuilder.Entity<TeamMember>()
+                .HasOne(tm => tm.Teams)
+                .WithMany(t => t.TeamMembers)
+                .HasForeignKey(tm => tm.TeamId);
+
+            modelBuilder.Entity<TeamMember>()
+                .HasOne(tm => tm.Users)
+                .WithMany(u => u.TeamMembers)
+                .HasForeignKey(tm => tm.UserId);
         }
     }
 }
