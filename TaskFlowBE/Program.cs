@@ -10,6 +10,7 @@ using LogicBusiness.UseCase;
 using LogicBusiness.Repository;
 using SqlServer;
 using SqlServer.Mapping;
+using System.Text.Json.Serialization;
 
 
 
@@ -88,10 +89,18 @@ builder.Services.AddScoped<ITeamMemberRepository, TeamMemberRepository>();
 builder.Services.AddScoped<ITeamMemberService, TeamMemberService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ITaskAssigneeRepository, TaskAssigneeRepository>();
+builder.Services.AddScoped<ITaskAssigneeService, TaskAssigneeService>();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
+
+builder.Services.AddControllers()
+    .AddJsonOptions(opt =>
+    {
+        opt.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
 
 //builder.Services.AddAutoMapper(typeof(MappingProfile));
 

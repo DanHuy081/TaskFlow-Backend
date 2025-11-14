@@ -44,5 +44,6 @@ namespace CoreEntities.Model
 
         // Quan hệ với TeamMembers (User → TeamMembers)
         public ICollection<TeamMember> TeamMembers { get; set; } = new List<TeamMember>();
+        public ICollection<TaskAssignee> TaskAssignees { get; set; }
     }
 }
