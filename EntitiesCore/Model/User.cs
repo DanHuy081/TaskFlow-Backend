@@ -16,7 +16,7 @@ namespace CoreEntities.Model
         public string? PasswordHash { get; set; } // Mật khẩu đã mã hóa
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        public ICollection<TeamMember> TeamMembers { get; set; } = new List<TeamMember>();
+        
 
     }
 

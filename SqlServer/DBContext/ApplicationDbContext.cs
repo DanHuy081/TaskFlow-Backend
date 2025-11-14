@@ -16,7 +16,7 @@ namespace TaskFlowBE.Data
         {
         }
 
-        public DbSet<User> Users { get; set; }
+        //public DbSet<User> Users { get; set; }
         public DbSet<TaskFL> Tasks { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Tag> Tags { get; set; }
@@ -27,6 +27,7 @@ namespace TaskFlowBE.Data
         public DbSet<Space> Spaces { get; set; }
         public DbSet<Team> Teams { get; set; }
         public DbSet<TeamMember> TeamMembers { get; set; }
+        public DbSet<UserFL> UserFLs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -68,7 +69,7 @@ namespace TaskFlowBE.Data
                 .HasForeignKey(tm => tm.TeamId);
 
             modelBuilder.Entity<TeamMember>()
-                .HasOne(tm => tm.Users)
+                .HasOne(tm => tm.UserFLs)
                 .WithMany(u => u.TeamMembers)
                 .HasForeignKey(tm => tm.UserId);
         }

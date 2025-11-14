@@ -30,6 +30,6 @@ namespace CoreEntities.Model
         public Team Teams { get; set; }
 
         [ForeignKey("UserId")]
-        public User Users { get; set; }
+        public UserFL UserFLs { get; set; }
     }
 }
