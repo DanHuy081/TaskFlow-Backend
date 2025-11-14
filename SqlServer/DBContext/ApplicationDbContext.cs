@@ -28,6 +28,7 @@ namespace TaskFlowBE.Data
         public DbSet<Team> Teams { get; set; }
         public DbSet<TeamMember> TeamMembers { get; set; }
         public DbSet<UserFL> UserFLs { get; set; }
+        public DbSet<TaskAssignee> TaskAssignees { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -72,6 +73,19 @@ namespace TaskFlowBE.Data
                 .HasOne(tm => tm.UserFLs)
                 .WithMany(u => u.TeamMembers)
                 .HasForeignKey(tm => tm.UserId);
+
+            modelBuilder.Entity<TaskAssignee>()
+                .HasKey(a => new { a.TaskId, a.UserId });
+
+            modelBuilder.Entity<TaskAssignee>()
+                .HasOne(a => a.Tasks)
+                .WithMany(t => t.TaskAssignees)
+                .HasForeignKey(a => a.TaskId);
+
+            modelBuilder.Entity<TaskAssignee>()
+                .HasOne(a => a.UserFLs)
+                .WithMany(u => u.TaskAssignees)
+                .HasForeignKey(a => a.UserId);
         }
     }
 }
