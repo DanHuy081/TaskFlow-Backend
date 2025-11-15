@@ -30,6 +30,8 @@ namespace TaskFlowBE.Data
         public DbSet<UserFL> UserFLs { get; set; }
         public DbSet<TaskAssignee> TaskAssignees { get; set; }
         public DbSet<GoalFL> Goals { get; set; }
+        public DbSet<ChecklistFL> Checklists { get; set; }
+        public DbSet<ChecklistItemFL> ChecklistItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -93,6 +95,24 @@ namespace TaskFlowBE.Data
                 .WithMany(t => t.Goals)
                 .HasForeignKey(g => g.TeamId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ChecklistFL>()
+                .HasOne(c => c.Task)
+                .WithMany(t => t.Checklists)
+                .HasForeignKey(c => c.TaskId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ChecklistItemFL>()
+                .HasOne(i => i.Checklist)
+                .WithMany(c => c.ChecklistItems)
+                .HasForeignKey(i => i.ChecklistId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ChecklistItemFL>()
+                .HasOne(i => i.User)
+                .WithMany()
+                .HasForeignKey(i => i.ResolvedBy)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }
