@@ -93,6 +93,10 @@ builder.Services.AddScoped<ITaskAssigneeRepository, TaskAssigneeRepository>();
 builder.Services.AddScoped<ITaskAssigneeService, TaskAssigneeService>();
 builder.Services.AddScoped<IGoalRepository, GoalRepository>();
 builder.Services.AddScoped<IGoalService, GoalService>();
+builder.Services.AddScoped<IChecklistRepository, ChecklistRepository>();
+builder.Services.AddScoped<IChecklistService, ChecklistService>();
+builder.Services.AddScoped<IChecklistItemRepository, ChecklistItemRepository>();
+builder.Services.AddScoped<IChecklistItemService, ChecklistItemService>();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
