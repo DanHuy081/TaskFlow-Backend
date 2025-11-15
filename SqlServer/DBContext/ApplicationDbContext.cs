@@ -32,6 +32,7 @@ namespace TaskFlowBE.Data
         public DbSet<GoalFL> Goals { get; set; }
         public DbSet<ChecklistFL> Checklists { get; set; }
         public DbSet<ChecklistItemFL> ChecklistItems { get; set; }
+        public DbSet<TimeEntryFL> TimeEntries { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -112,6 +113,18 @@ namespace TaskFlowBE.Data
                 .HasOne(i => i.User)
                 .WithMany()
                 .HasForeignKey(i => i.ResolvedBy)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<TimeEntryFL>()
+                .HasOne(t => t.Task)
+                .WithMany()
+                .HasForeignKey(t => t.TaskId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<TimeEntryFL>()
+                .HasOne(t => t.User)
+                .WithMany()
+                .HasForeignKey(t => t.UserId)
                 .OnDelete(DeleteBehavior.SetNull);
         }
     }
