@@ -99,6 +99,10 @@ builder.Services.AddScoped<IChecklistItemRepository, ChecklistItemRepository>();
 builder.Services.AddScoped<IChecklistItemService, ChecklistItemService>();
 builder.Services.AddScoped<ITimeEntryRepository, TimeEntryRepository>();
 builder.Services.AddScoped<ITimeEntryService, TimeEntryService>();
+builder.Services.AddScoped<ICustomFieldRepository, CustomFieldRepository>();
+builder.Services.AddScoped<ICustomFieldService, CustomFieldService>();
+builder.Services.AddScoped<ITaskCustomFieldValueRepository, TaskCustomFieldValueRepository>();
+builder.Services.AddScoped<ITaskCustomFieldValueService, TaskCustomFieldValueService>();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
