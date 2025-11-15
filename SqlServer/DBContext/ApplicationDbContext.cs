@@ -33,6 +33,8 @@ namespace TaskFlowBE.Data
         public DbSet<ChecklistFL> Checklists { get; set; }
         public DbSet<ChecklistItemFL> ChecklistItems { get; set; }
         public DbSet<TimeEntryFL> TimeEntries { get; set; }
+        public DbSet<CustomFieldFL> CustomFields { get; set; }
+        public DbSet<TaskCustomFieldValueFL> TaskCustomFieldValues { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -126,6 +128,21 @@ namespace TaskFlowBE.Data
                 .WithMany()
                 .HasForeignKey(t => t.UserId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<TaskCustomFieldValueFL>()
+                .HasKey(x => new { x.TaskId, x.FieldId });
+
+            modelBuilder.Entity<TaskCustomFieldValueFL>()
+                .HasOne(v => v.Task)
+                .WithMany(t => t.CustomFieldValues)
+                .HasForeignKey(v => v.TaskId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<TaskCustomFieldValueFL>()
+                .HasOne(v => v.CustomField)
+                .WithMany(f => f.Values)
+                .HasForeignKey(v => v.FieldId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -64,5 +64,7 @@ namespace CoreEntities.Model
         public List List { get; set; }
         public ICollection<TaskAssignee> TaskAssignees { get; set; }
         public ICollection<ChecklistFL> Checklists { get; set; }
+
+        public ICollection<TaskCustomFieldValueFL> CustomFieldValues { get; set; }
     }
 }
