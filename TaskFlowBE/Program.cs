@@ -97,6 +97,8 @@ builder.Services.AddScoped<IChecklistRepository, ChecklistRepository>();
 builder.Services.AddScoped<IChecklistService, ChecklistService>();
 builder.Services.AddScoped<IChecklistItemRepository, ChecklistItemRepository>();
 builder.Services.AddScoped<IChecklistItemService, ChecklistItemService>();
+builder.Services.AddScoped<ITimeEntryRepository, TimeEntryRepository>();
+builder.Services.AddScoped<ITimeEntryService, TimeEntryService>();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
