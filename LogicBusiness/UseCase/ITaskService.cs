@@ -10,9 +10,9 @@ namespace LogicBusiness.UseCase
 {
     public interface ITaskService
     {
-        Task<IEnumerable<TaskFL>> GetAllTasksAsync();
+        Task<IEnumerable<TaskDto>> GetAllTasksAsync();
         Task<TaskFL> GetTaskByIdAsync(string id);
-        Task CreateTaskAsync(TaskFL task);
+        Task<TaskDto> CreateAsync(TaskCreateDto dto);
         Task UpdateTaskAsync(TaskFL task);
         Task DeleteTaskAsync(string id);
     }

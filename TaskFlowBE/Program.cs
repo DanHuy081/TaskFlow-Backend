@@ -11,6 +11,7 @@ using LogicBusiness.Repository;
 using SqlServer;
 using SqlServer.Mapping;
 using System.Text.Json.Serialization;
+using CoreEntities.Mapping;
 
 
 
@@ -65,6 +66,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+builder.Services.AddAutoMapper(typeof(TaskProfile));
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddScoped<ITaskService, TaskService>();
