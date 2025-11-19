@@ -30,10 +30,10 @@ namespace TaskFlowBE.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TaskFL>>> GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var tasks = await _taskService.GetAllTasksAsync();
-            return Ok(tasks);
+            var result = await _taskService.GetAllTasksAsync();
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
@@ -45,10 +45,10 @@ namespace TaskFlowBE.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Create(TaskFL task)
+        public async Task<IActionResult> Create([FromBody] TaskCreateDto dto)
         {
-            await _taskService.CreateTaskAsync(task);
-            return CreatedAtAction(nameof(GetById), new { id = task.Id }, task);
+            var result = await _taskService.CreateAsync(dto);
+            return Ok(result); // trả về DTO
         }
 
         [HttpPut("{id}")]
