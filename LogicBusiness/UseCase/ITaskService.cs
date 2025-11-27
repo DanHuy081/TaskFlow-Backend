@@ -13,7 +13,7 @@ namespace LogicBusiness.UseCase
         Task<IEnumerable<TaskDto>> GetAllTasksAsync();
         Task<TaskFL> GetTaskByIdAsync(string id);
         Task<TaskDto> CreateAsync(TaskCreateDto dto);
-        Task UpdateTaskAsync(TaskFL task);
+        Task<TaskDto> UpdateAsync(string id, TaskUpdateDto dto);
         Task DeleteTaskAsync(string id);
     }
 }

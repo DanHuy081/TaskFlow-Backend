@@ -1,4 +1,5 @@
 ﻿using CoreEntities.Model;
+using CoreEntities.Model.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,8 +13,8 @@ namespace LogicBusiness.UseCase
         Task<IEnumerable<Comment>> GetAllCommentsAsync();
         Task<Comment> GetCommentByIdAsync(string id);
         Task<IEnumerable<Comment>> GetCommentsByTaskIdAsync(string taskId);
-        Task AddCommentAsync(Comment comment);
-        Task UpdateCommentAsync(Comment comment);
+        Task<CommentDto> CreateAsync(CommentCreateDto dto);
+        Task<CommentDto?> UpdateAsync(string id, CommentUpdateDto dto);
         Task DeleteCommentAsync(string id);
     }
 }

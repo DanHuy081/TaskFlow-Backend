@@ -72,11 +72,20 @@ namespace LogicBusiness.Service
 
 
 
-        public async Task UpdateTaskAsync(TaskFL task)
+        public async Task<TaskDto?> UpdateAsync(string id, TaskUpdateDto dto)
         {
-            task.DateUpdated = System.DateTime.UtcNow;
-            await _taskRepository.UpdateAsync(task);
+            var entity = await _taskRepository.GetByIdAsync(id);
+            if (entity == null) return null;
+
+            // Map từ UpdateDto sang Entity (ghi đè các field)
+            _mapper.Map(dto, entity);
+
+            entity.DateUpdated = DateTime.UtcNow;
+
+            await _taskRepository.UpdateAsync(entity);
+            return _mapper.Map<TaskDto>(entity);
         }
+
 
         public async Task DeleteTaskAsync(string id)
         {

@@ -52,11 +52,12 @@ namespace TaskFlowBE.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> Update(string id, TaskFL task)
+        public async Task<ActionResult> Update(string id, TaskUpdateDto dto)
         {
-            if (id != task.Id) return BadRequest();
-            await _taskService.UpdateTaskAsync(task);
-            return NoContent();
+            var updated = await _taskService.UpdateAsync(id, dto);
+            if (updated == null) return NotFound();
+
+            return Ok(updated);
         }
 
         [HttpDelete("{id}")]

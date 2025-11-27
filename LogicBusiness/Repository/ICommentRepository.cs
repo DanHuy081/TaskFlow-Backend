@@ -12,7 +12,7 @@ namespace LogicBusiness.Repository
         Task<IEnumerable<Comment>> GetAllAsync();
         Task<Comment> GetByIdAsync(string id);
         Task<IEnumerable<Comment>> GetByTaskIdAsync(string taskId);
-        Task AddAsync(Comment comment);
+        Task CreateAsync(Comment comment);
         Task UpdateAsync(Comment comment);
         Task DeleteAsync(string id);
     }
