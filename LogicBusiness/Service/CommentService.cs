@@ -1,4 +1,6 @@
-﻿using CoreEntities.Model;
+﻿using AutoMapper;
+using CoreEntities.Model;
+using CoreEntities.Model.DTOs;
 using LogicBusiness.Repository;
 using LogicBusiness.UseCase;
 using System;
@@ -12,10 +14,12 @@ namespace LogicBusiness.Service
     public class CommentService : ICommentService
     {
         private readonly ICommentRepository _repository;
+        private readonly IMapper _mapper;
 
-        public CommentService(ICommentRepository repository)
+        public CommentService(ICommentRepository repository, IMapper mapper)
         {
             _repository = repository;
+            _mapper = mapper;
         }
 
         public async Task<IEnumerable<Comment>> GetAllCommentsAsync()
@@ -33,18 +37,32 @@ namespace LogicBusiness.Service
             return await _repository.GetByTaskIdAsync(taskId);
         }
 
-        public async Task AddCommentAsync(Comment comment)
+        public async Task<CommentDto> CreateAsync(CommentCreateDto dto)
         {
-            comment.CommentId = Guid.NewGuid().ToString();
-            comment.DateCreated = DateTime.UtcNow;
-            await _repository.AddAsync(comment);
+            var entity = _mapper.Map<Comment>(dto);
+            entity.CommentId = Guid.NewGuid().ToString();
+            entity.IsEdited = false;
+            entity.DateCreated = DateTime.UtcNow;
+            entity.DateUpdated = DateTime.UtcNow;
+
+            await _repository.CreateAsync(entity);
+
+            return _mapper.Map<CommentDto>(entity);
         }
 
-        public async Task UpdateCommentAsync(Comment comment)
+        public async Task<CommentDto?> UpdateAsync(string id, CommentUpdateDto dto)
         {
-            comment.DateUpdated = DateTime.UtcNow;
-            comment.IsEdited = true;
-            await _repository.UpdateAsync(comment);
+            var entity = await _repository.GetByIdAsync(id);
+            if (entity == null) return null;
+
+
+            _mapper.Map(dto, entity);
+            entity.IsEdited = true;
+            entity.DateUpdated = DateTime.UtcNow;
+
+
+            await _repository.UpdateAsync(entity);
+            return _mapper.Map<CommentDto>(entity);
         }
 
         public async Task DeleteCommentAsync(string id)

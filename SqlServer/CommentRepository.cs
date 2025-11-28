@@ -37,7 +37,7 @@ namespace SqlServer
                 .ToListAsync();
         }
 
-        public async Task AddAsync(Comment comment)
+        public async Task CreateAsync(Comment comment)
         {
             _context.Comments.Add(comment);
             await _context.SaveChangesAsync();

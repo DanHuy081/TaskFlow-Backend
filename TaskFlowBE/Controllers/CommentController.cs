@@ -2,6 +2,7 @@
 using CoreEntities.Model;
 using LogicBusiness.Service;
 using LogicBusiness.UseCase;
+using CoreEntities.Model.DTOs;
 
 namespace TaskFlowBE.Controllers
 {
@@ -40,20 +41,17 @@ namespace TaskFlowBE.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Comment comment)
+        public async Task<IActionResult> Create(CommentCreateDto dto)
         {
-            await _service.AddCommentAsync(comment);
-            return CreatedAtAction(nameof(GetById), new { id = comment.CommentId }, comment);
+            var result = await _service.CreateAsync(dto);
+            return Ok(result);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(string id, [FromBody] Comment comment)
+        public async Task<IActionResult> Update(string id, CommentUpdateDto dto)
         {
-            if (id != comment.CommentId)
-                return BadRequest("ID mismatch.");
-
-            await _service.UpdateCommentAsync(comment);
-            return NoContent();
+            var updated = await _service.UpdateAsync(id, dto);
+            return updated == null ? NotFound() : Ok(updated);
         }
 
         [HttpDelete("{id}")]
