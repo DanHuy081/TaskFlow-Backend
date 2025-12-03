@@ -14,5 +14,8 @@ namespace LogicBusiness.Repository
         Task AddAsync(Team team);
         Task UpdateAsync(Team team);
         Task DeleteAsync(string id);
+        //
+        Task AddTeamAsync(Team team);
+        Task AddTeamMemberAsync(TeamMember member);
     }
 }

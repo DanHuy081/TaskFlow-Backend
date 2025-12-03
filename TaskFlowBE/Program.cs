@@ -168,6 +168,7 @@ using SqlServer;
 using SqlServer.Mapping;
 using System.Text.Json.Serialization;
 using CoreEntities.Mapping;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -217,18 +218,18 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 // JWT Authentication
 var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
+            ValidateIssuer = false,
+            ValidateAudience = false,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(key)
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+
+            RoleClaimType = ClaimTypes.Role
         };
     });
 
@@ -247,6 +248,7 @@ builder.Services.AddCors(options =>
 // -------------------------
 // 2. Dependency Injection
 // -------------------------
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<ITaskRepository, TaskRepository>();

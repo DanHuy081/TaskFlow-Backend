@@ -26,7 +26,7 @@ namespace SqlServer
 
         public async Task<UserFL> GetByIdAsync(string id)
         {
-            return await _context.UserFLs.FindAsync(id);
+            return await _context.UserFLs.FirstOrDefaultAsync(u => u.UserId == id);
         }
 
         public async Task AddAsync(UserFL user)
@@ -49,6 +49,18 @@ namespace SqlServer
                 _context.UserFLs.Remove(user);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public async Task<UserFL?> GetByUsernameAsync(string username)
+        => await _context.UserFLs.FirstOrDefaultAsync(u => u.Username == username);
+
+        public async Task<UserFL?> GetByEmailAsync(string email)
+            => await _context.UserFLs.FirstOrDefaultAsync(u => u.Email == email);
+
+        public async Task CreateAsync(UserFL user)
+        {
+            _context.UserFLs.Add(user);
+            await _context.SaveChangesAsync();
         }
     }
 }

@@ -18,6 +18,10 @@ namespace CoreEntities.Mapping
 
             // Map từ Entity sang TaskDto để trả về client
             CreateMap<TaskFL, TaskDto>();
+
+            CreateMap<TaskStatusUpdateDto, TaskFL>()
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
+
         }
     }
 }

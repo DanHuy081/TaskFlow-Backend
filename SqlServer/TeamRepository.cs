@@ -50,5 +50,17 @@ namespace SqlServer
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task AddTeamAsync(Team team)
+        {
+            _context.Teams.Add(team);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddTeamMemberAsync(TeamMember member)
+        {
+            _context.TeamMembers.Add(member);
+            await _context.SaveChangesAsync();
+        }
     }
 }
