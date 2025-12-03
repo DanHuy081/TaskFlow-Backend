@@ -38,5 +38,6 @@ namespace CoreEntities.Model
 
         // Một Space có nhiều Folder
         public ICollection<Folder> Folders { get; set; } = new List<Folder>();
+        public virtual Team Teams { get; set; }
     }
 }

@@ -19,7 +19,7 @@ namespace CoreEntities.Model
         public string SpaceId { get; set; }
 
         [Column("FolderId")]
-        public string FolderId { get; set; }
+        public string? FolderId { get; set; }
 
         [Column("Name")]
         public string Name { get; set; }

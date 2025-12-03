@@ -1,99 +1,89 @@
-﻿//using Microsoft.AspNetCore.Mvc;
-//using Microsoft.EntityFrameworkCore;
-//using TaskFlowBE.Data;
-//using CoreEntities.Model;
-//using System.Security.Cryptography;
-//using System.Text;
-//using Microsoft.IdentityModel.Tokens;
-//using System.IdentityModel.Tokens.Jwt;
-//using System.Security.Claims;
-//using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using TaskFlowBE.Data;
+using CoreEntities.Model;
+using System.Security.Cryptography;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.ComponentModel.DataAnnotations;
+using CoreEntities.Model.DTOs;
+using LogicBusiness.UseCase;
+using Microsoft.AspNetCore.Authorization;
+using LogicBusiness.Repository;
 
-//namespace TaskFlowBE.Controllers
-//{
-//    [Route("api/[controller]")]
-//    [ApiController]
-//    public class AuthController : ControllerBase
-//    {
-//        private readonly ApplicationDbContext _context;
-//        private readonly IConfiguration _config;
+namespace TaskFlowBE.Controllers
+{
 
-//        public AuthController(ApplicationDbContext context, IConfiguration config)
-//        {
-//            _context = context;
-//            _config = config;
-//        }
+    [ApiController]
+    [Route("api/[controller]")]
+    public class AuthController : ControllerBase
+    {
+        private readonly IAuthService _auth;
+        private readonly IUserRepository _userRepo;
 
-//        [HttpPost("register")]
-//        public async Task<IActionResult> Register([FromBody] UserRegisterDto request)
-//        {
-//            // Kiểm tra username đã tồn tại chưa
-//            if (await _context.Users.AnyAsync(u => u.FullName == request.Username))
-//                return BadRequest("Username already exists");
+        public AuthController(IAuthService auth, IUserRepository userRepo)
+        {
+            _auth = auth;
+            _userRepo = userRepo;
+        }
 
-//            // Mã hóa mật khẩu
-//            string passwordHash = HashPassword(request.Password);
+        [HttpPost("register")]
+        public async Task<IActionResult> Register(RegisterDto dto)
+        {
+            await _auth.RegisterAsync(dto);
+            return Ok(new { message = "User registered successfully" });
+        }
+        [AllowAnonymous]
+        [HttpPost("login")]
+        public async Task<IActionResult> Login(LoginDto dto)
+        {
+            var token = await _auth.LoginAsync(dto);
+            if (token == null) return Unauthorized();
+            return Ok(new { token });
+        }
 
-//            var user = new User
-//            {
-//                FullName = request.Username,
-//                Email = request.Email,
-//                PasswordHash = passwordHash
-//            };
+        [HttpGet("me")]
+        [Authorize] // Bắt buộc phải có Token mới gọi được
+        public async Task<IActionResult> GetMe()
+        {
+            try
+            {
+                // 1. Lấy User ID từ trong Token (ClaimTypes.NameIdentifier)
+                // Token đã được giải mã tự động bởi Middleware và lưu vào biến 'User'
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-//            _context.Users.Add(user);
-//            await _context.SaveChangesAsync();
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("Token không hợp lệ hoặc thiếu thông tin.");
+                }
 
-//            return Ok(new { message = "User registered successfully" });
-//        }
+                // 2. Truy vấn Database để lấy thông tin mới nhất (bao gồm Role)
+                // (Lý do nên query DB: để lỡ Admin vừa đổi quyền thì lấy được ngay, 
+                // không phụ thuộc vào thông tin cũ trong Token)
+                var user = await _userRepo.GetByIdAsync(userId);
+                // Lưu ý: Bạn cần đảm bảo Repo có hàm GetByIdAsync hoặc tương tự
 
-//        private string HashPassword(string password)
-//        {
-//            using var sha = SHA256.Create();
-//            var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(password));
-//            return Convert.ToBase64String(bytes);
-//        }
+                if (user == null)
+                {
+                    return NotFound("Không tìm thấy người dùng.");
+                }
 
-//        [HttpPost("login")]
-//        public async Task<IActionResult> Login([FromBody] UserLoginDto request)
-//        {
-//            // Tìm user theo username
-//            var user = await _context.Users.FirstOrDefaultAsync(u => u.FullName == request.Username);
-//            if (user == null)
-//                return BadRequest("Invalid username or password");
-
-//            // Kiểm tra mật khẩu
-//            var hash = HashPassword(request.Password);
-//            if (hash != user.PasswordHash)
-//                return BadRequest("Invalid username or password");
-
-//            // Tạo JWT token
-//            string token = CreateToken(user);
-//            return Ok(new { token });
-//        }
-
-//        private string CreateToken(User user)
-//        {
-//            var claims = new List<Claim>
-//    {
-//        new Claim(ClaimTypes.Name, user.FullName),
-//        new Claim(ClaimTypes.Email, user.Email),
-//        new Claim("UserId", user.UserId.ToString())
-//    };
-
-//            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
-//            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-//            var token = new JwtSecurityToken(
-//                issuer: _config["Jwt:Issuer"],
-//                audience: _config["Jwt:Audience"],
-//                claims: claims,
-//                expires: DateTime.Now.AddHours(3),
-//                signingCredentials: creds
-//            );
-
-//            return new JwtSecurityTokenHandler().WriteToken(token);
-//        }
-
-//    }
-//}
+                // 3. Trả về thông tin cho Frontend (ẩn password hash đi)
+                return Ok(new
+                {
+                    user.UserId,
+                    user.Username,
+                    user.Email,
+                    user.Role, // <--- CÁI FE ĐANG CẦN LÀ ĐÂY
+                    user.DateCreated
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+    }
+}

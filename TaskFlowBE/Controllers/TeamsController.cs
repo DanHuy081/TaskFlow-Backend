@@ -1,11 +1,16 @@
 ﻿using CoreEntities.Model;
+using CoreEntities.Model.DTOs;
+using LogicBusiness.Service;
 using LogicBusiness.UseCase;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace TaskFlowBE.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Member, Guest")]
     public class TeamsController : ControllerBase
     {
         private readonly ITeamService _service;
@@ -31,10 +36,28 @@ namespace TaskFlowBE.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Team team)
+        [Authorize]
+        public async Task<IActionResult> Create([FromBody] CreateTeamDto dto)
         {
-            await _service.AddAsync(team);
-            return Ok(team);
+            // 1. Validate userId
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            // 2. Validate input
+            if (string.IsNullOrEmpty(dto.Name)) return BadRequest("Tên Team là bắt buộc");
+
+            try
+            {
+                // 3. Gọi Service
+                var createdTeam = await _service.CreateTeamAsync(dto, userId);
+
+                // 4. Trả về kết quả
+                return Ok(createdTeam);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpPut("{id}")]

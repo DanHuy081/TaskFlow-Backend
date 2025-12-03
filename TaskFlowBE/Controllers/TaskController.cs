@@ -11,11 +11,13 @@ using System.ComponentModel.DataAnnotations;
 using LogicBusiness.UseCase;
 using CoreEntities.Model.DTOs;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TaskFlowBE.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")] // Route sẽ là: /api/tasks
+    [Route("api/[controller]")]
+    [Authorize(Roles = "Guest, Member")]
     public class TasksController : ControllerBase
     {
         private readonly ITaskService _taskService;
@@ -66,5 +68,15 @@ namespace TaskFlowBE.API.Controllers
             await _taskService.DeleteTaskAsync(id);
             return NoContent();
         }
+
+        [HttpPatch("{id}/status")]
+        public async Task<IActionResult> UpdateStatus(string id, TaskStatusUpdateDto dto)
+        {
+            var updated = await _taskService.UpdateStatusAsync(id, dto);
+            if (updated == null) return NotFound();
+
+            return Ok(updated);
+        }
+
     }
 }

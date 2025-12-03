@@ -91,5 +91,19 @@ namespace LogicBusiness.Service
         {
             await _taskRepository.DeleteAsync(id);
         }
+
+        public async Task<TaskDto?> UpdateStatusAsync(string id, TaskStatusUpdateDto dto)
+        {
+            var task = await _taskRepository.GetByIdAsync(id);
+            if (task == null) return null;
+
+            task.Status = dto.Status;
+            task.DateUpdated = DateTime.UtcNow;
+
+            await _taskRepository.UpdateAsync(task);
+
+            return _mapper.Map<TaskDto>(task);
+        }
+
     }
 }

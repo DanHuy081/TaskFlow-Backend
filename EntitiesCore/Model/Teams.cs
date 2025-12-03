@@ -36,5 +36,7 @@ namespace CoreEntities.Model
         // 🔗 Quan hệ 1 Team có nhiều TeamMembers
         public ICollection<TeamMember> TeamMembers { get; set; } = new List<TeamMember>();
         public ICollection<GoalFL> Goals { get; set; }
+
+        public virtual ICollection<Space> Spaces { get; set; }
     }
 }

@@ -14,5 +14,9 @@ namespace LogicBusiness.Repository
         Task AddAsync(UserFL user);
         Task UpdateAsync(UserFL user);
         Task DeleteAsync(string id);
+
+        Task<UserFL?> GetByUsernameAsync(string username);
+        Task<UserFL?> GetByEmailAsync(string email);
+        Task CreateAsync(UserFL user);
     }
 }

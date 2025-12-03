@@ -16,22 +16,22 @@ namespace CoreEntities.Model
         public string UserId { get; set; }
 
         [Column("Username")]
-        public string Username { get; set; }
+        public string? Username { get; set; }
 
         [Column("Email")]
         public string Email { get; set; }
 
         [Column("FullName")]
-        public string FullName { get; set; }
+        public string? FullName { get; set; }
 
         [Column("Color")]
-        public string Color { get; set; }
+        public string? Color { get; set; }
 
         [Column("ProfilePicture")]
         public string? ProfilePicture { get; set; }
 
         [Column("Role")]
-        public string Role { get; set; }
+        public string? Role { get; set; }
 
         [Column("Timezone")]
         public string? Timezone { get; set; }
@@ -41,9 +41,14 @@ namespace CoreEntities.Model
 
         [Column("DateUpdated")]
         public DateTime? DateUpdated { get; set; }
+        [Column("PasswordHash")]
+        public byte[]? PasswordHash { get; set; }
+        [Column("PasswordSalt")]
+        public byte[]? PasswordSalt { get; set; }
+
 
         // Quan hệ với TeamMembers (User → TeamMembers)
-        public ICollection<TeamMember> TeamMembers { get; set; } = new List<TeamMember>();
+        public ICollection<TeamMember> TeamMembers { get; set; }
         public ICollection<TaskAssignee> TaskAssignees { get; set; }
     }
 }

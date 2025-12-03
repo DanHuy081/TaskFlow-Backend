@@ -3,11 +3,13 @@ using CoreEntities.Model;
 using LogicBusiness.Service;
 using LogicBusiness.UseCase;
 using CoreEntities.Model.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TaskFlowBE.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "Member, Guest")]
     public class CommentController : ControllerBase
     {
         private readonly ICommentService _service;
