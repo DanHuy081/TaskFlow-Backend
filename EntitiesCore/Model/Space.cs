@@ -16,19 +16,19 @@ namespace CoreEntities.Model
         public string SpaceId { get; set; }
 
         [Column("TeamId")]
-        public string TeamId { get; set; }
+        public string? TeamId { get; set; }
 
         [Column("Name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [Column("Color")]
-        public string Color { get; set; }
+        public string? Color { get; set; }
 
         [Column("IsPrivate")]
         public bool? IsPrivate { get; set; }
 
         [Column("Settings")]
-        public string Settings { get; set; }
+        public string? Settings { get; set; }
 
         [Column("DateCreated")]
         public DateTime? DateCreated { get; set; }

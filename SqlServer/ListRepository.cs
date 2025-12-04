@@ -29,10 +29,11 @@ namespace SqlServer
             return await _context.Lists.FindAsync(id);
         }
 
-        public async Task AddAsync(List list)
+        public async Task<List> CreateAsync(List entity)
         {
-            _context.Lists.Add(list);
+            _context.Lists.Add(entity);
             await _context.SaveChangesAsync();
+            return entity;
         }
 
         public async Task UpdateAsync(List list)
@@ -49,6 +50,20 @@ namespace SqlServer
                 _context.Lists.Remove(list);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public async Task<List<List>> GetBySpaceIdAsync(string spaceId)
+        {
+            return await _context.Lists
+                .Where(l => l.SpaceId == spaceId)
+                .ToListAsync();
+        }
+
+        public async Task<List<List>> GetByFolderIdAsync(string folderId)
+        {
+            return await _context.Lists
+                .Where(l => l.FolderId == folderId)
+                .ToListAsync();
         }
     }
 }

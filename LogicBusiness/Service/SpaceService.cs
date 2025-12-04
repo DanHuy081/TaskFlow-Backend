@@ -1,4 +1,6 @@
-﻿using CoreEntities.Model;
+﻿using AutoMapper;
+using CoreEntities.Model;
+using CoreEntities.Model.DTOs;
 using LogicBusiness.Repository;
 using LogicBusiness.UseCase;
 using System;
@@ -12,10 +14,13 @@ namespace LogicBusiness.Service
     public class SpaceService : ISpaceService
     {
         private readonly ISpaceRepository _repo;
+        private readonly IMapper _mapper;
 
-        public SpaceService(ISpaceRepository repo)
+
+        public SpaceService(ISpaceRepository repo, IMapper mapper)
         {
             _repo = repo;
+            _mapper = mapper;
         }
 
         public async Task<IEnumerable<Space>> GetAllAsync()
@@ -28,11 +33,23 @@ namespace LogicBusiness.Service
             return await _repo.GetByIdAsync(id);
         }
 
-        public async Task AddAsync(Space space)
+        public async Task<SpaceDto> CreateAsync(SpaceCreateDto dto, string userId)
         {
-            space.SpaceId = Guid.NewGuid().ToString();
-            space.DateCreated = DateTime.UtcNow;
-            await _repo.AddAsync(space);
+            var space = new Space
+            {
+                SpaceId = Guid.NewGuid().ToString(),
+                TeamId = dto.TeamId,
+                Name = dto.Name,
+                Color = "#7A08FA",       // default optional
+                IsPrivate = false,
+                Settings = null,
+                DateCreated = DateTime.UtcNow,
+                DateUpdated = DateTime.UtcNow
+            };
+
+            await _repo.CreateAsync(space);
+
+            return _mapper.Map<SpaceDto>(space);
         }
 
         public async Task UpdateAsync(Space space)
@@ -44,6 +61,13 @@ namespace LogicBusiness.Service
         public async Task DeleteAsync(string id)
         {
             await _repo.DeleteAsync(id);
+        }
+
+        public async Task<List<SpaceDto>> GetMySpacesAsync(string userId)
+        {
+            var spaces = await _repo.GetSpacesByUserAsync(userId);
+
+            return _mapper.Map<List<SpaceDto>>(spaces);
         }
     }
 }
