@@ -1,4 +1,5 @@
 ﻿using CoreEntities.Model;
+using CoreEntities.Model.DTOs;
 using LogicBusiness.UseCase;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,10 +32,10 @@ namespace TaskFlowBE.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] List list)
+        public async Task<IActionResult> Create([FromBody] ListCreateDto dto)
         {
-            await _service.AddAsync(list);
-            return Ok(list);
+            var result = await _service.CreateAsync(dto);
+            return Ok(result);
         }
 
         [HttpPut("{id}")]
@@ -50,6 +51,20 @@ namespace TaskFlowBE.Controllers
         {
             await _service.DeleteAsync(id);
             return NoContent();
+        }
+
+        [HttpGet("space/{spaceId}")]
+        public async Task<IActionResult> GetBySpace(string spaceId)
+        {
+            var result = await _service.GetBySpaceAsync(spaceId);
+            return Ok(result);
+        }
+
+        [HttpGet("folder/{folderId}")]
+        public async Task<IActionResult> GetByFolder(string folderId)
+        {
+            var result = await _service.GetByFolderAsync(folderId);
+            return Ok(result);
         }
     }
 }

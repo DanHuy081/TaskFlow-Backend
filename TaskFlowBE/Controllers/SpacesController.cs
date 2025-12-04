@@ -1,7 +1,10 @@
 ﻿using CoreEntities.Model;
+using CoreEntities.Model.DTOs;
+using LogicBusiness.Service;
 using LogicBusiness.UseCase;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace TaskFlowBE.Controllers
 {
@@ -33,10 +36,14 @@ namespace TaskFlowBE.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Space space)
+        [Authorize]
+        public async Task<IActionResult> CreateSpace(SpaceCreateDto dto)
         {
-            await _service.AddAsync(space);
-            return Ok(space);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null) return Unauthorized();
+
+            var result = await _service.CreateAsync(dto, userId);
+            return Ok(result);
         }
 
         [HttpPut("{id}")]
@@ -52,6 +59,20 @@ namespace TaskFlowBE.Controllers
         {
             await _service.DeleteAsync(id);
             return NoContent();
+        }
+
+
+        [HttpGet("my-spaces")]
+        public async Task<IActionResult> GetMySpaces()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userId == null)
+                return Unauthorized();
+
+            var spaces = await _service.GetMySpacesAsync(userId);
+
+            return Ok(spaces);
         }
     }
 }

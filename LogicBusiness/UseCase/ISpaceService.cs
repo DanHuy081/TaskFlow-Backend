@@ -1,4 +1,5 @@
 ﻿using CoreEntities.Model;
+using CoreEntities.Model.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,8 +12,9 @@ namespace LogicBusiness.UseCase
     {
         Task<IEnumerable<Space>> GetAllAsync();
         Task<Space> GetByIdAsync(string id);
-        Task AddAsync(Space space);
+        Task<SpaceDto> CreateAsync(SpaceCreateDto dto, string userId);
         Task UpdateAsync(Space space);
         Task DeleteAsync(string id);
+        Task<List<SpaceDto>> GetMySpacesAsync(string userId);
     }
 }

@@ -16,7 +16,7 @@ namespace CoreEntities.Model
         public string ListId { get; set; }
 
         [Column("SpaceId")]
-        public string SpaceId { get; set; }
+        public string? SpaceId { get; set; }
 
         [Column("FolderId")]
         public string? FolderId { get; set; }
@@ -25,10 +25,10 @@ namespace CoreEntities.Model
         public string Name { get; set; }
 
         [Column("Status")]
-        public string Status { get; set; }
+        public string? Status { get; set; }
 
         [Column("Priority")]
-        public string Priority { get; set; }
+        public string? Priority { get; set; }
 
         [Column("DueDate")]
         public DateTime? DueDate { get; set; }

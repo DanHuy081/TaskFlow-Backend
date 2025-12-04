@@ -11,8 +11,9 @@ namespace LogicBusiness.Repository
     {
         Task<IEnumerable<Space>> GetAllAsync();
         Task<Space> GetByIdAsync(string id);
-        Task AddAsync(Space space);
+        Task CreateAsync(Space space);
         Task UpdateAsync(Space space);
         Task DeleteAsync(string id);
+        Task<List<Space>> GetSpacesByUserAsync(string userId, string? teamId = null);
     }
 }

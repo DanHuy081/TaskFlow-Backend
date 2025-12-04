@@ -143,6 +143,19 @@ namespace TaskFlowBE.Data
                 .WithMany(f => f.Values)
                 .HasForeignKey(v => v.FieldId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<TeamMember>()
+                .HasOne(tm => tm.Teams)
+                .WithMany(t => t.TeamMembers)
+                .HasForeignKey(tm => tm.TeamId)
+                .OnDelete(DeleteBehavior.Cascade); // <--- QUAN TRỌNG
+
+            // 2. Cấu hình Team -> Spaces (Xóa Team là xóa sạch Space)
+            modelBuilder.Entity<Space>()
+                .HasOne(s => s.Teams)
+                .WithMany(t => t.Spaces)
+                .HasForeignKey(s => s.TeamId)
+                .OnDelete(DeleteBehavior.Cascade); // <--- QUAN TRỌNG
         }
     }
 }
