@@ -155,7 +155,7 @@
 //app.Run();
 
 using Microsoft.EntityFrameworkCore;
-using TaskFlowBE.Data;
+using SqlServer.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -169,6 +169,7 @@ using SqlServer.Mapping;
 using System.Text.Json.Serialization;
 using CoreEntities.Mapping;
 using System.Security.Claims;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -211,8 +212,10 @@ builder.Services.AddSwaggerGen(options =>
 
 // DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
+        b => b.MigrationsAssembly("SqlServer")); // 👈 THÊM DÒNG NÀY
+});
 // AutoMapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 

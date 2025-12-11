@@ -12,8 +12,9 @@ namespace LogicBusiness.Repository
         Task<IEnumerable<ChecklistItemFL>> GetAllAsync();
         Task<IEnumerable<ChecklistItemFL>> GetByChecklistIdAsync(string checklistId);
         Task<ChecklistItemFL> GetByIdAsync(string id);
-        Task AddAsync(ChecklistItemFL item);
+        Task<ChecklistItemFL> CreateAsync(ChecklistItemFL item);
         Task UpdateAsync(ChecklistItemFL item);
         Task DeleteAsync(string id);
+        Task ToggleResolvedAsync(string itemId, string userId);
     }
 }

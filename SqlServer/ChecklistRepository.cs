@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TaskFlowBE.Data;
+using SqlServer.Data;
 
 namespace SqlServer
 {
@@ -41,10 +41,11 @@ namespace SqlServer
                 .FirstOrDefaultAsync(c => c.ChecklistId == id);
         }
 
-        public async Task AddAsync(ChecklistFL checklist)
+        public async Task<ChecklistFL> CreateAsync(ChecklistFL checklist)
         {
             _context.Checklists.Add(checklist);
             await _context.SaveChangesAsync();
+            return checklist;
         }
 
         public async Task UpdateAsync(ChecklistFL checklist)

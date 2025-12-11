@@ -12,7 +12,7 @@ namespace LogicBusiness.Repository
         Task<IEnumerable<ChecklistFL>> GetAllAsync();
         Task<IEnumerable<ChecklistFL>> GetByTaskIdAsync(string taskId);
         Task<ChecklistFL> GetByIdAsync(string id);
-        Task AddAsync(ChecklistFL checklist);
+        Task<ChecklistFL> CreateAsync(ChecklistFL checklist);
         Task UpdateAsync(ChecklistFL checklist);
         Task DeleteAsync(string id);
     }

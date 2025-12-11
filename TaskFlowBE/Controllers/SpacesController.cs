@@ -54,10 +54,10 @@ namespace TaskFlowBE.Controllers
             return Ok(space);
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(string id)
+        [HttpDelete("{spaceId}")]
+        public async Task<IActionResult> DeleteSpace(string spaceId)
         {
-            await _service.DeleteAsync(id);
+            await _service.DeleteSpaceCascadeAsync(spaceId);
             return NoContent();
         }
 

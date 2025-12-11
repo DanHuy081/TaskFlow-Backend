@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TaskFlowBE.Data;
+using SqlServer.Data;
 
 namespace SqlServer
 {
@@ -47,6 +47,13 @@ namespace SqlServer
                 _context.Tasks.Remove(task);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public async Task<IEnumerable<TaskFL>> GetByListAsync(string listId)
+        {
+            return await _context.Tasks
+                .Where(t => t.ListId == listId)
+                .ToListAsync();
         }
     }
 }

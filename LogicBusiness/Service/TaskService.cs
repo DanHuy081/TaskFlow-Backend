@@ -105,5 +105,10 @@ namespace LogicBusiness.Service
             return _mapper.Map<TaskDto>(task);
         }
 
+        public async Task<IEnumerable<TaskDto>> GetByListAsync(string listId)
+        {
+            var tasks = await _taskRepository.GetByListAsync(listId);
+            return _mapper.Map<IEnumerable<TaskDto>>(tasks);
+        }
     }
 }

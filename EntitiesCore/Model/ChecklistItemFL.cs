@@ -19,7 +19,7 @@ namespace CoreEntities.Model
         public string ChecklistId { get; set; }
 
         [Column("Name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [Column("IsResolved")]
         public bool? IsResolved { get; set; }
@@ -31,7 +31,7 @@ namespace CoreEntities.Model
         public DateTime? DateCreated { get; set; }
 
         [Column("ResolvedBy")]
-        public string ResolvedBy { get; set; }
+        public string? ResolvedBy { get; set; }
 
         [Column("ResolvedAt")]
         public DateTime? ResolvedAt { get; set; }

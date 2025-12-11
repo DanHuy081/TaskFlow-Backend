@@ -42,9 +42,9 @@ namespace LogicBusiness.Service
             await _repo.UpdateAsync(team);
         }
 
-        public async Task DeleteAsync(string id)
+        public async Task DeleteTeamCascadeAsync(string teamId)
         {
-            await _repo.DeleteAsync(id);
+            await _repo.DeleteTeamCascadeAsync(teamId);
         }
 
         public async Task<Team> CreateTeamAsync(CreateTeamDto dto, string userId)
@@ -75,6 +75,36 @@ namespace LogicBusiness.Service
             await _repo.AddTeamMemberAsync(member);
 
             return newTeam;
+        }
+
+        public async Task<bool> AddUserToTeamAsync(string teamId, string email, string role)
+        {
+            // 1. Logic: Tìm User xem có tồn tại không
+            var user = await _repo.GetUserByEmailAsync(email);
+            if (user == null)
+            {
+                throw new Exception("Email không tồn tại trong hệ thống.");
+            }
+
+            // 2. Logic: Kiểm tra xem đã vào nhóm chưa (tránh trùng lặp)
+            var isExist = await _repo.IsMemberExistAsync(teamId, user.UserId);
+            if (isExist)
+            {
+                throw new Exception("Thành viên này đã ở trong nhóm rồi.");
+            }
+
+            // 3. Logic: Chuẩn bị dữ liệu để lưu
+            var newMember = new TeamMember
+            {
+                TeamId = teamId,
+                UserId = user.UserId,
+                Role = role,
+                DateJoined = DateTime.UtcNow
+            };
+
+            // 4. Gọi Repo để lưu xuống DB
+            await _repo.AddMemberAsync(newMember);
+            return true;
         }
     }
 }

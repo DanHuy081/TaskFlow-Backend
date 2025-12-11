@@ -68,11 +68,28 @@ namespace TaskFlowBE.Controllers
             return Ok(team);
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(string id)
+        [HttpDelete("{teamId}")]
+        public async Task<IActionResult> DeleteTeam(string teamId)
         {
-            await _service.DeleteAsync(id);
+            await _service.DeleteTeamCascadeAsync(teamId);
             return NoContent();
+        }
+
+        [HttpPost("{teamId}/members")]
+        public async Task<IActionResult> AddMember(string teamId, [FromBody] AddMemberDto dto)
+        {
+            try
+            {
+                // Gọi Service để xử lý
+                await _service.AddUserToTeamAsync(teamId, dto.Email, "Member");
+
+                return Ok(new { message = "Thêm thành viên thành công!" });
+            }
+            catch (Exception ex)
+            {
+                // Nếu Service báo lỗi (VD: Email ko tồn tại), trả về 400
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

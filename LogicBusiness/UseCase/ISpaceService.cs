@@ -14,7 +14,7 @@ namespace LogicBusiness.UseCase
         Task<Space> GetByIdAsync(string id);
         Task<SpaceDto> CreateAsync(SpaceCreateDto dto, string userId);
         Task UpdateAsync(Space space);
-        Task DeleteAsync(string id);
+        Task DeleteSpaceCascadeAsync(string spaceId);
         Task<List<SpaceDto>> GetMySpacesAsync(string userId);
     }
 }

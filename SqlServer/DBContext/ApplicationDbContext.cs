@@ -7,7 +7,7 @@ using CoreEntities.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer;
 
-namespace TaskFlowBE.Data
+namespace SqlServer.Data
 {
     public class ApplicationDbContext : DbContext
     {

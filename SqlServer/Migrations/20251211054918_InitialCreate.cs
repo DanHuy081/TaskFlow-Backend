@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SqlServer.Migrations
 {
     /// <inheritdoc />
-    public partial class EnableCascadeDeleteTeam : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -192,11 +192,11 @@ namespace SqlServer.Migrations
                 columns: table => new
                 {
                     ListId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    SpaceId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SpaceId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     FolderId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Priority = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Priority = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DueDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DateUpdated = table.Column<DateTime>(type: "datetime2", nullable: true)
@@ -373,11 +373,11 @@ namespace SqlServer.Migrations
                 {
                     ChecklistItemId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ChecklistId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsResolved = table.Column<bool>(type: "bit", nullable: true),
                     OrderIndex = table.Column<int>(type: "int", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    ResolvedBy = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ResolvedBy = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     ResolvedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>

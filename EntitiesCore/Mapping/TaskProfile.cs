@@ -21,7 +21,10 @@ namespace CoreEntities.Mapping
 
             CreateMap<TaskStatusUpdateDto, TaskFL>()
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
-
+            CreateMap<TaskUpdateDto, TaskFL>()
+            // Dòng dưới giúp bỏ qua các giá trị null khi update.
+            // Nghĩa là: Nếu DTO gửi field nào là null, nó sẽ GIỮ NGUYÊN giá trị cũ trong database, không bị ghi đè thành null.
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));             
         }
     }
 }
