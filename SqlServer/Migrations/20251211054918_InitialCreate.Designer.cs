@@ -5,15 +5,15 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using TaskFlowBE.Data;
+using SqlServer.Data;
 
 #nullable disable
 
 namespace SqlServer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251204095059_EnableCascadeDeleteTeam")]
-    partial class EnableCascadeDeleteTeam
+    [Migration("20251211054918_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -119,7 +119,6 @@ namespace SqlServer.Migrations
                         .HasColumnName("IsResolved");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("Name");
 
@@ -132,7 +131,6 @@ namespace SqlServer.Migrations
                         .HasColumnName("ResolvedAt");
 
                     b.Property<string>("ResolvedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("ResolvedBy");
 
@@ -318,17 +316,14 @@ namespace SqlServer.Migrations
                         .HasColumnName("Name");
 
                     b.Property<string>("Priority")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("Priority");
 
                     b.Property<string>("SpaceId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("SpaceId");
 
                     b.Property<string>("Status")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("Status");
 
@@ -738,8 +733,7 @@ namespace SqlServer.Migrations
                     b.HasOne("CoreEntities.Model.UserFL", "User")
                         .WithMany()
                         .HasForeignKey("ResolvedBy")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Checklist");
 

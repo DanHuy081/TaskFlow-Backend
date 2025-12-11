@@ -58,9 +58,9 @@ namespace LogicBusiness.Service
             await _repo.UpdateAsync(space);
         }
 
-        public async Task DeleteAsync(string id)
+        public async Task DeleteSpaceCascadeAsync(string spaceId)
         {
-            await _repo.DeleteAsync(id);
+            await _repo.DeleteSpaceCascadeAsync(spaceId);
         }
 
         public async Task<List<SpaceDto>> GetMySpacesAsync(string userId)

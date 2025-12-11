@@ -1,4 +1,5 @@
 ﻿using CoreEntities.Model;
+using CoreEntities.Model.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,9 +11,9 @@ namespace LogicBusiness.UseCase
     public interface IChecklistService
     {
         Task<IEnumerable<ChecklistFL>> GetAllAsync();
-        Task<IEnumerable<ChecklistFL>> GetByTaskIdAsync(string taskId);
+        Task<IEnumerable<ChecklistDto>> GetByTaskIdAsync(string taskId);
         Task<ChecklistFL> GetByIdAsync(string id);
-        Task AddAsync(ChecklistFL checklist);
+        Task<ChecklistDto> CreateAsync(CreateChecklistDto dto);
         Task UpdateAsync(ChecklistFL checklist);
         Task DeleteAsync(string id);
     }

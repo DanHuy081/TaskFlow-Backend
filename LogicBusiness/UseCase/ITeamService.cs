@@ -14,7 +14,9 @@ namespace LogicBusiness.UseCase
         Task<Team> GetByIdAsync(string id);
         Task AddAsync(Team team);
         Task UpdateAsync(Team team);
-        Task DeleteAsync(string id);
+        Task DeleteTeamCascadeAsync(string teamId);
         Task<Team> CreateTeamAsync(CreateTeamDto dto, string userId);
+
+        Task<bool> AddUserToTeamAsync(string teamId, string email, string role);
     }
 }

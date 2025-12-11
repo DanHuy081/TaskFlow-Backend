@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TaskFlowBE.Data;
+using SqlServer.Data;
 
 namespace SqlServer
 {
@@ -30,8 +30,8 @@ namespace SqlServer
         public async Task<IEnumerable<ChecklistItemFL>> GetByChecklistIdAsync(string checklistId)
         {
             return await _context.ChecklistItems
-                .Where(i => i.ChecklistId == checklistId)
-                .Include(i => i.User)
+                .Where(x => x.ChecklistId == checklistId)
+                .OrderBy(x => x.OrderIndex)
                 .ToListAsync();
         }
 
@@ -43,10 +43,11 @@ namespace SqlServer
                 .FirstOrDefaultAsync(i => i.ChecklistItemId == id);
         }
 
-        public async Task AddAsync(ChecklistItemFL item)
+        public async Task<ChecklistItemFL> CreateAsync(ChecklistItemFL item)
         {
             _context.ChecklistItems.Add(item);
             await _context.SaveChangesAsync();
+            return item;
         }
 
         public async Task UpdateAsync(ChecklistItemFL item)
@@ -63,6 +64,18 @@ namespace SqlServer
                 _context.ChecklistItems.Remove(item);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public async Task ToggleResolvedAsync(string itemId, string userId)
+        {
+            var item = await _context.ChecklistItems.FindAsync(itemId);
+            if (item == null) return;
+
+            item.IsResolved = !item.IsResolved;
+            item.ResolvedBy = userId;
+            item.ResolvedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
         }
     }
 }

@@ -13,7 +13,8 @@ namespace LogicBusiness.Repository
         Task<Space> GetByIdAsync(string id);
         Task CreateAsync(Space space);
         Task UpdateAsync(Space space);
-        Task DeleteAsync(string id);
+        Task DeleteSpaceCascadeAsync(string spaceId);
+
         Task<List<Space>> GetSpacesByUserAsync(string userId, string? teamId = null);
     }
 }

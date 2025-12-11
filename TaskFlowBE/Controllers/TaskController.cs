@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using TaskFlowBE.Data;
+using SqlServer.Data;
 using CoreEntities.Model;
 using System.Security.Cryptography;
 using System.Text;
@@ -78,5 +78,11 @@ namespace TaskFlowBE.API.Controllers
             return Ok(updated);
         }
 
+        [HttpGet("by-list/{listId}")]
+        public async Task<IActionResult> GetByList(string listId)
+        {
+            var tasks = await _taskService.GetByListAsync(listId);
+            return Ok(tasks);
+        }
     }
 }

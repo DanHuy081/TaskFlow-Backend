@@ -1,4 +1,5 @@
 ﻿using CoreEntities.Model;
+using CoreEntities.Model.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,9 +11,10 @@ namespace LogicBusiness.UseCase
     public interface IChecklistItemService
     {
         Task<IEnumerable<ChecklistItemFL>> GetAllAsync();
-        Task<IEnumerable<ChecklistItemFL>> GetByChecklistIdAsync(string checklistId);
+        Task<IEnumerable<ChecklistItemDto>> GetByChecklistIdAsync(string checklistId);
         Task<ChecklistItemFL> GetByIdAsync(string id);
-        Task AddAsync(ChecklistItemFL item);
+        Task<ChecklistItemDto> CreateAsync(CreateChecklistItemDto dto);
+        Task ToggleResolvedAsync(string itemId, string userId);
         Task UpdateAsync(ChecklistItemFL item);
         Task DeleteAsync(string id);
     }

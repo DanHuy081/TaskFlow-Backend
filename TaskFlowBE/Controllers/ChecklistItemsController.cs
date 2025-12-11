@@ -1,6 +1,8 @@
 ﻿using CoreEntities.Model;
+using CoreEntities.Model.DTOs;
 using LogicBusiness.UseCase;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace TaskFlowBE.Controllers
 {
@@ -19,23 +21,26 @@ namespace TaskFlowBE.Controllers
         public async Task<IActionResult> GetAll()
             => Ok(await _service.GetAllAsync());
 
-        [HttpGet("checklist/{checklistId}")]
+        [HttpGet("{checklistId}")]
         public async Task<IActionResult> GetByChecklist(string checklistId)
-            => Ok(await _service.GetByChecklistIdAsync(checklistId));
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(string id)
         {
-            var item = await _service.GetByIdAsync(id);
-            if (item == null) return NotFound();
-            return Ok(item);
+            var result = await _service.GetByChecklistIdAsync(checklistId);
+            return Ok(result);
         }
 
+        //[HttpGet("{id}")]
+        //public async Task<IActionResult> GetById(string id)
+        //{
+        //    var item = await _service.GetByIdAsync(id);
+        //    if (item == null) return NotFound();
+        //    return Ok(item);
+        //}
+
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] ChecklistItemFL item)
+        public async Task<IActionResult> Create(CreateChecklistItemDto dto)
         {
-            await _service.AddAsync(item);
-            return Ok(item);
+            var result = await _service.CreateAsync(dto);
+            return Ok(result);
         }
 
         [HttpPut("{id}")]
@@ -52,6 +57,14 @@ namespace TaskFlowBE.Controllers
         public async Task<IActionResult> Delete(string id)
         {
             await _service.DeleteAsync(id);
+            return NoContent();
+        }
+
+        [HttpPut("{itemId}/toggle")]
+        public async Task<IActionResult> Toggle(string itemId)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            await _service.ToggleResolvedAsync(itemId, userId);
             return NoContent();
         }
     }

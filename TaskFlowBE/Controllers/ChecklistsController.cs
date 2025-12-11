@@ -1,11 +1,14 @@
 ﻿using CoreEntities.Model;
+using CoreEntities.Model.DTOs;
 using LogicBusiness.UseCase;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace TaskFlowBE.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Guest, Member")]
     public class ChecklistsController : ControllerBase
     {
         private readonly IChecklistService _service;
@@ -24,22 +27,23 @@ namespace TaskFlowBE.Controllers
         [HttpGet("task/{taskId}")]
         public async Task<IActionResult> GetByTask(string taskId)
         {
-            return Ok(await _service.GetByTaskIdAsync(taskId));
+            var result = await _service.GetByTaskIdAsync(taskId);
+            return Ok(result);
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(string id)
-        {
-            var checklist = await _service.GetByIdAsync(id);
-            if (checklist == null) return NotFound();
-            return Ok(checklist);
-        }
+        //[HttpGet("{id}")]
+        //public async Task<IActionResult> GetById(string id)
+        //{
+        //    var checklist = await _service.GetByIdAsync(id);
+        //    if (checklist == null) return NotFound();
+        //    return Ok(checklist);
+        //}
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] ChecklistFL checklist)
+        public async Task<IActionResult> Create(CreateChecklistDto dto)
         {
-            await _service.AddAsync(checklist);
-            return Ok(checklist);
+            var result = await _service.CreateAsync(dto);
+            return Ok(result);
         }
 
         [HttpPut("{id}")]

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TaskFlowBE.Data;
+using SqlServer.Data;
 
 namespace SqlServer
 {
@@ -41,15 +41,105 @@ namespace SqlServer
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(string id)
+        public async Task DeleteSpaceCascadeAsync(string spaceId)
         {
-            var space = await _context.Spaces.FindAsync(id);
-            if (space != null)
+            // Lấy space trước
+            var space = await _context.Spaces.FirstOrDefaultAsync(s => s.SpaceId == spaceId);
+            if (space == null) return;
+
+            // ------------------------------------------------------------
+            // 1. Lấy tất cả folders thuộc space
+            // ------------------------------------------------------------
+            var folders = await _context.Folders
+                .Where(f => f.SpaceId == spaceId)
+                .ToListAsync();
+
+            foreach (var folder in folders)
             {
-                _context.Spaces.Remove(space);
-                await _context.SaveChangesAsync();
+                // ------------------------------------------------------------
+                // 2. Lấy tất cả lists trong folder
+                // ------------------------------------------------------------
+                var lists = await _context.Lists
+                    .Where(l => l.FolderId == folder.FolderId)
+                    .ToListAsync();
+
+                foreach (var list in lists)
+                {
+                    // ------------------------------------------------------------
+                    // 3. Lấy tasks trong list
+                    // ------------------------------------------------------------
+                    var tasks = await _context.Tasks
+                        .Where(t => t.ListId == list.ListId)
+                        .ToListAsync();
+
+                    foreach (var task in tasks)
+                    {
+                        // Checklist Items
+                        var checklistItems = await _context.ChecklistItems
+                            .Where(ci => ci.Checklist.TaskId == task.Id)
+                            .ToListAsync();
+                        _context.ChecklistItems.RemoveRange(checklistItems);
+
+                        // Checklists
+                        var checklists = await _context.Checklists
+                            .Where(c => c.TaskId == task.Id)
+                            .ToListAsync();
+                        _context.Checklists.RemoveRange(checklists);
+
+                        // Comments
+                        var comments = await _context.Comments
+                            .Where(c => c.TaskId == task.Id)
+                            .ToListAsync();
+                        _context.Comments.RemoveRange(comments);
+
+                        // Attachments
+                        var attachments = await _context.Attachments
+                            .Where(a => a.TaskId == task.Id)
+                            .ToListAsync();
+                        _context.Attachments.RemoveRange(attachments);
+
+                        // Assignees
+                        var assignees = await _context.TaskAssignees
+                            .Where(a => a.TaskId == task.Id)
+                            .ToListAsync();
+                        _context.TaskAssignees.RemoveRange(assignees);
+
+                        // Time Entries
+                        var timeEntries = await _context.TimeEntries
+                            .Where(te => te.TaskId == task.Id)
+                            .ToListAsync();
+                        _context.TimeEntries.RemoveRange(timeEntries);
+
+                        // Custom Field Values
+                        var customValues = await _context.TaskCustomFieldValues
+                            .Where(cv => cv.TaskId == task.Id)
+                            .ToListAsync();
+                        _context.TaskCustomFieldValues.RemoveRange(customValues);
+
+                        // Cuối cùng xoá task
+                        _context.Tasks.Remove(task);
+                    }
+
+                    // ------------------------------------------------------------
+                    // Xóa List
+                    // ------------------------------------------------------------
+                    _context.Lists.Remove(list);
+                }
+
+                // ------------------------------------------------------------
+                // Xóa Folder
+                // ------------------------------------------------------------
+                _context.Folders.Remove(folder);
             }
+
+            // ------------------------------------------------------------
+            // Cuối cùng xóa Space
+            // ------------------------------------------------------------
+            _context.Spaces.Remove(space);
+
+            await _context.SaveChangesAsync();
         }
+
 
         public async Task<List<Space>> GetSpacesByUserAsync(string userId, string? teamId = null)
         {

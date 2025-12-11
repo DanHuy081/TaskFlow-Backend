@@ -13,9 +13,20 @@ namespace LogicBusiness.Repository
         Task<Team> GetByIdAsync(string id);
         Task AddAsync(Team team);
         Task UpdateAsync(Team team);
-        Task DeleteAsync(string id);
+        Task DeleteTeamCascadeAsync(string teamId);
         //
         Task AddTeamAsync(Team team);
         Task AddTeamMemberAsync(TeamMember member);
+
+        //
+
+        // Kiểm tra user đã có trong team chưa
+        Task<bool> IsMemberExistAsync(string teamId, string userId);
+
+        // Thêm thành viên mới
+        Task AddMemberAsync(TeamMember member);
+
+        // Tìm user qua email (Hàm hỗ trợ)
+        Task<UserFL?> GetUserByEmailAsync(string email);
     }
 }

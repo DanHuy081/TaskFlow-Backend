@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace CoreEntities.Model.DTOs
 {
-    internal class TeamAddMemberDto
+    public class CreateChecklistItemDto
     {
+        public string ChecklistId { get; set; }
+        public string Name { get; set; }
     }
 }
