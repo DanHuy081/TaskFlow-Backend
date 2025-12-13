@@ -1,4 +1,5 @@
 ﻿using CoreEntities.Model;
+using CoreEntities.Model.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,10 +11,10 @@ namespace LogicBusiness.UseCase
     public interface IGoalService
     {
         Task<IEnumerable<GoalFL>> GetAllAsync();
-        Task<IEnumerable<GoalFL>> GetByTeamIdAsync(string teamId);
+        Task<IEnumerable<GoalDto?>> GetByTeamIdAsync(string teamId);
         Task<GoalFL> GetByIdAsync(string id);
-        Task AddAsync(GoalFL goal);
-        Task UpdateAsync(GoalFL goal);
-        Task DeleteAsync(string id);
+        Task<GoalDto> CreateAsync(GoalCreateDto dto);
+        Task<bool> UpdateAsync(string goalId, GoalUpdateDto dto);
+        Task<bool> DeleteAsync(string goalId);
     }
 }

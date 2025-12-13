@@ -27,11 +27,11 @@ namespace SqlServer
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<TaskAssignee>> GetByTaskIdAsync(string taskId)
+        public async Task<List<TaskAssignee>> GetByTaskIdAsync(string taskId)
         {
             return await _context.TaskAssignees
-                .Where(a => a.TaskId == taskId)
-                .Include(a => a.UserFLs)
+                .Where(x => x.TaskId == taskId)
+                .Include(x => x.UserFLs)
                 .ToListAsync();
         }
 
@@ -49,20 +49,23 @@ namespace SqlServer
                 .FirstOrDefaultAsync(a => a.TaskId == taskId && a.UserId == userId);
         }
 
-        public async Task AddAsync(TaskAssignee assignee)
+        public async Task<TaskAssignee> AddAsync(TaskAssignee entity)
         {
-            _context.TaskAssignees.Add(assignee);
+            await _context.TaskAssignees.AddAsync(entity);
             await _context.SaveChangesAsync();
+            return entity;
         }
 
-        public async Task DeleteAsync(string taskId, string userId)
+        public async Task<bool> DeleteAsync(string taskId, string userId)
         {
-            var record = await GetAsync(taskId, userId);
-            if (record != null)
-            {
-                _context.TaskAssignees.Remove(record);
-                await _context.SaveChangesAsync();
-            }
+            var assignee = await _context.TaskAssignees
+                .FirstOrDefaultAsync(x => x.TaskId == taskId && x.UserId == userId);
+
+            if (assignee == null) return false;
+
+            _context.TaskAssignees.Remove(assignee);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

@@ -14,6 +14,6 @@ namespace LogicBusiness.Repository
         Task<GoalFL> GetByIdAsync(string id);
         Task AddAsync(GoalFL goal);
         Task UpdateAsync(GoalFL goal);
-        Task DeleteAsync(string id);
+        Task DeleteAsync(GoalFL goal);
     }
 }

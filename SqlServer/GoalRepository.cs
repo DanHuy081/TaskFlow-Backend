@@ -18,11 +18,16 @@ namespace SqlServer
         {
             _context = context;
         }
-
         public async Task<IEnumerable<GoalFL>> GetAllAsync()
         {
             return await _context.Goals
                 .Include(g => g.Teams)
+                .ToListAsync();
+        }
+        public async Task<List<GoalFL>> GetByTeamAsync(string teamId)
+        {
+            return await _context.Goals
+                .Where(g => g.TeamId == teamId)
                 .ToListAsync();
         }
 
@@ -52,14 +57,10 @@ namespace SqlServer
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(string id)
+        public async Task DeleteAsync(GoalFL goal)
         {
-            var goal = await _context.Goals.FindAsync(id);
-            if (goal != null)
-            {
-                _context.Goals.Remove(goal);
-                await _context.SaveChangesAsync();
-            }
+            _context.Goals.Remove(goal);
+            await _context.SaveChangesAsync();
         }
     }
 }
