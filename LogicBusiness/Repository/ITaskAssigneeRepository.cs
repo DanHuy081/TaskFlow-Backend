@@ -10,10 +10,10 @@ namespace LogicBusiness.Repository
     public interface ITaskAssigneeRepository
     {
         Task<IEnumerable<TaskAssignee>> GetAllAsync();
-        Task<IEnumerable<TaskAssignee>> GetByTaskIdAsync(string taskId);
         Task<IEnumerable<TaskAssignee>> GetByUserIdAsync(string userId);
         Task<TaskAssignee> GetAsync(string taskId, string userId);
-        Task AddAsync(TaskAssignee assignee);
-        Task DeleteAsync(string taskId, string userId);
+        Task<List<TaskAssignee>> GetByTaskIdAsync(string taskId);
+        Task<TaskAssignee> AddAsync(TaskAssignee entity);
+        Task<bool> DeleteAsync(string taskId, string userId);
     }
 }

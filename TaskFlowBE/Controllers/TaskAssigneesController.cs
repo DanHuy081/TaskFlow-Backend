@@ -1,4 +1,5 @@
 ﻿using CoreEntities.Model;
+using CoreEntities.Model.DTOs;
 using LogicBusiness.UseCase;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,10 +22,11 @@ namespace TaskFlowBE.Controllers
             return Ok(await _service.GetAllAsync());
         }
 
-        [HttpGet("task/{taskId}")]
+        [HttpGet("{taskId}")]
         public async Task<IActionResult> GetByTask(string taskId)
         {
-            return Ok(await _service.GetByTaskIdAsync(taskId));
+            var result = await _service.GetByTaskIdAsync(taskId);
+            return Ok(result);
         }
 
         [HttpGet("user/{userId}")]
@@ -34,17 +36,18 @@ namespace TaskFlowBE.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] TaskAssignee assignee)
+        public async Task<IActionResult> AssignUser(TaskAssigneeCreateDto dto)
         {
-            await _service.AddAsync(assignee);
-            return Ok(assignee);
+            var result = await _service.AssignUserAsync(dto);
+            return Ok(result);
         }
 
         [HttpDelete("{taskId}/{userId}")]
-        public async Task<IActionResult> Delete(string taskId, string userId)
+        public async Task<IActionResult> Unassign(string taskId, string userId)
         {
-            await _service.DeleteAsync(taskId, userId);
-            return NoContent();
+            var success = await _service.UnassignUserAsync(taskId, userId);
+            if (!success) return NotFound();
+            return Ok(new { message = "User unassigned successfully." });
         }
     }
 }

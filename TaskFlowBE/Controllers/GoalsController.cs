@@ -1,4 +1,5 @@
 ﻿using CoreEntities.Model;
+using CoreEntities.Model.DTOs;
 using LogicBusiness.UseCase;
 using Microsoft.AspNetCore.Mvc;
 
@@ -36,27 +37,24 @@ namespace TaskFlowBE.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] GoalFL goal)
+        public async Task<ActionResult> Create(GoalCreateDto dto)
         {
-            await _service.AddAsync(goal);
-            return Ok(goal);
+            var created = await _service.CreateAsync(dto);
+            return Ok(created);
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(string id, [FromBody] GoalFL goal)
+        [HttpPut("{goalId}")]
+        public async Task<ActionResult> Update(string goalId, GoalUpdateDto dto)
         {
-            if (id != goal.GoalId)
-                return BadRequest("Mismatched GoalId");
-
-            await _service.UpdateAsync(goal);
-            return Ok(goal);
+            var ok = await _service.UpdateAsync(goalId, dto);
+            return ok ? Ok() : NotFound();
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(string id)
+        [HttpDelete("{goalId}")]
+        public async Task<ActionResult> Delete(string goalId)
         {
-            await _service.DeleteAsync(id);
-            return NoContent();
+            var ok = await _service.DeleteAsync(goalId);
+            return ok ? Ok() : NotFound();
         }
     }
 }
