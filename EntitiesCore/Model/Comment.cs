@@ -31,6 +31,8 @@ namespace CoreEntities.Model
 
         [Column("DateUpdated")]
         public DateTime? DateUpdated { get; set; }
+        [Column("VectorData")]
+        public string? VectorData { get; set; }
         public TaskFL Task { get; set; }
        
     }
