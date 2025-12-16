@@ -289,6 +289,9 @@ builder.Services.AddScoped<ICustomFieldRepository, CustomFieldRepository>();
 builder.Services.AddScoped<ICustomFieldService, CustomFieldService>();
 builder.Services.AddScoped<ITaskCustomFieldValueRepository, TaskCustomFieldValueRepository>();
 builder.Services.AddScoped<ITaskCustomFieldValueService, TaskCustomFieldValueService>();
+builder.Services.AddScoped<ICalendarRepository, CalendarRepository>();
+builder.Services.AddScoped<ICalendarService, CalendarService>();
+
 
 // -------------------------
 // 3. Build App

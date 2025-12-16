@@ -22,7 +22,7 @@ namespace CoreEntities.Model
         public string Name { get; set; }
 
         [Column("Description")]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         [Column("DueDate")]
         public DateTime? DueDate { get; set; }
@@ -32,7 +32,8 @@ namespace CoreEntities.Model
 
         [Column("DateCreated")]
         public DateTime? DateCreated { get; set; }
-
+        [Column("VectorData")]
+        public string? VectorData { get; set; }
         // 🔗 Quan hệ
         [ForeignKey("TeamId")]
         public Team Teams { get; set; }

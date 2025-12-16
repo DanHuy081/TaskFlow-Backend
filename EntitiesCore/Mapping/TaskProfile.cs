@@ -18,6 +18,25 @@ namespace CoreEntities.Mapping
 
             // Map từ Entity sang TaskDto để trả về client
             CreateMap<TaskFL, TaskDto>();
+            CreateMap<TaskCreateDto, TaskFL>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.DateCreated, opt => opt.Ignore())
+                .ForMember(dest => dest.DateUpdated, opt => opt.Ignore());
+
+            CreateMap<TaskCreateDto, TaskFL>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.DateCreated, opt => opt.Ignore())
+                .ForMember(dest => dest.DateUpdated, opt => opt.Ignore());
+
+            CreateMap<TaskFL, CalendarTaskDto>()
+            .ForMember(dest => dest.Title,
+                opt => opt.MapFrom(src =>
+                    string.IsNullOrEmpty(src.Name)
+                        ? "Untitled Task"
+                        : src.Name
+                ))
+            .ForMember(dest => dest.Start, opt => opt.MapFrom(src => src.StartDate))
+            .ForMember(dest => dest.End, opt => opt.MapFrom(src => src.DueDate));
 
             CreateMap<TaskStatusUpdateDto, TaskFL>()
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
