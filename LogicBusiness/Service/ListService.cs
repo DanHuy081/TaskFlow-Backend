@@ -74,5 +74,11 @@ namespace LogicBusiness.Service
             var data = await _repo.GetByFolderIdAsync(folderId);
             return _mapper.Map<List<ListDto>>(data);
         }
+
+        public Task<List<ListBriefDto>> GetListsByUserIdAsync(string userId)
+            => _repo.GetListsByUserIdAsync(userId);
+
+        public Task<List<ListBriefDto>> GetListsBySpaceIdAsync(string spaceId)
+            => _repo.GetListsBySpaceIdAsync(spaceId);
     }
 }

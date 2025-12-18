@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SqlServer.Data;
+using CoreEntities.Model.DTOs;
 
 namespace SqlServer
 {
@@ -163,5 +164,53 @@ namespace SqlServer
             // Thực thi và trả về
             return await query.ToListAsync();
         }
+
+        public async Task<List<SpaceBriefDto>> GetSpacesByUserIdAsync(string userId)
+        {
+            // user -> teammembers -> spaces
+            var data = await (
+                from tm in _context.Set<TeamMember>()
+                join s in _context.Set<Space>() on tm.TeamId equals s.TeamId
+                where tm.UserId == userId
+                select new SpaceBriefDto
+                {
+                    SpaceId = s.SpaceId.ToString(),
+                    TeamId = s.TeamId.ToString(),
+                    Name = s.Name
+                }
+            ).Distinct().ToListAsync();
+
+            return data;
+        }
+
+        public async Task<List<SpaceBriefDto>> GetSpacesByTeamIdAsync(string teamId)
+        {
+            // teamId string -> compare theo ToString() cho nhanh (hoặc parse Guid nếu bạn muốn)
+            var data = await _context.Set<Space>()
+                .Where(s => s.TeamId.ToString() == teamId)
+                .Select(s => new SpaceBriefDto
+                {
+                    SpaceId = s.SpaceId.ToString(),
+                    TeamId = s.TeamId.ToString(),
+                    Name = s.Name
+                })
+                .ToListAsync();
+
+            return data;
+        }
+
+        public async Task<SpaceBriefDto?> GetSpaceByIdAsync(string spaceId)
+        {
+            return await _context.Set<Space>()
+                .Where(s => s.SpaceId.ToString() == spaceId)
+                .Select(s => new SpaceBriefDto
+                {
+                    SpaceId = s.SpaceId.ToString(),
+                    TeamId = s.TeamId.ToString(),
+                    Name = s.Name
+                })
+                .FirstOrDefaultAsync();
+        }
     }
 }
+

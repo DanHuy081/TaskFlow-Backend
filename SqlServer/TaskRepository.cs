@@ -55,5 +55,16 @@ namespace SqlServer
                 .Where(t => t.ListId == listId)
                 .ToListAsync();
         }
+
+        public async Task<List<TaskFL>> GetTasksByUserIdAsync(string userId)
+        {
+            // Giả sử bạn đã có _context hoặc _repo
+            // Logic: Lấy task mà user này tạo hoặc được assign
+            return await _context.Tasks
+                .Include(t => t.List) // Include bảng List/Space nếu cần
+                .Where(t => t.CreatorId == userId || t.TaskAssignees.Any(ta => ta.UserId == userId))
+                .OrderByDescending(t => t.DateCreated)
+                .ToListAsync();
+        }
     }
 }

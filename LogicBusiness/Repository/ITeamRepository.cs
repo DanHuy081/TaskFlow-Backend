@@ -1,4 +1,5 @@
 ﻿using CoreEntities.Model;
+using CoreEntities.Model.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,5 +29,7 @@ namespace LogicBusiness.Repository
 
         // Tìm user qua email (Hàm hỗ trợ)
         Task<UserFL?> GetUserByEmailAsync(string email);
+
+        Task<List<TeamBriefDto>> GetTeamsByUserIdAsync(string userId);
     }
 }

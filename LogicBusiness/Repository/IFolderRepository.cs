@@ -1,4 +1,5 @@
 ﻿using CoreEntities.Model;
+using CoreEntities.Model.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,5 +15,8 @@ namespace LogicBusiness.Repository
         Task AddAsync(Folder folder);
         Task UpdateAsync(Folder folder);
         Task DeleteAsync(string id);
+        //-------
+        Task<List<FolderBriefDto>> GetFoldersBySpaceIdAsync(string spaceId);
+        Task<List<FolderBriefDto>> GetFoldersByUserIdAsync(string userId);
     }
 }

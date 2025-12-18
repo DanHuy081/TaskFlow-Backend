@@ -10,6 +10,7 @@ namespace CoreEntities.Model.DTOs
     {
         public string UserId { get; set; }
         public string FullName { get; set; }
+        public string Email { get; set; }
         public string ProfilePicture { get; set; }
         public string Color { get; set; }   // màu avatar
     }

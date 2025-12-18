@@ -106,5 +106,10 @@ namespace LogicBusiness.Service
             await _repo.AddMemberAsync(newMember);
             return true;
         }
+
+        public Task<List<TeamBriefDto>> GetTeamsByUserIdAsync(string userId)
+        {
+            return _repo.GetTeamsByUserIdAsync(userId);
+        }
     }
 }

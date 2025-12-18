@@ -27,8 +27,21 @@ namespace LogicBusiness.Service
 
         public async Task<List<TaskAssigneeDto>> GetByTaskIdAsync(string taskId)
         {
-            var data = await _repo.GetByTaskIdAsync(taskId);
-            return _mapper.Map<List<TaskAssigneeDto>>(data);
+            var assignees = await _repo.GetByTaskIdAsync(taskId);
+
+            return assignees.Select(a => new TaskAssigneeDto
+            {
+                UserId = a.UserId,
+                AssignedAt = (DateTime)a.AssignedAt,
+                User = a.UserFLs == null ? null : new UserMiniDto
+                {
+                    UserId = a.UserFLs.UserId,
+                    FullName = a.UserFLs.FullName,
+                    Email = a.UserFLs.Email,
+                    Color = a.UserFLs.Color,
+                    ProfilePicture = a.UserFLs.ProfilePicture
+                }
+            }).ToList();
         }
 
         public async Task<IEnumerable<TaskAssignee>> GetByUserIdAsync(string userId)

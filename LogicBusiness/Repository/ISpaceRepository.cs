@@ -1,4 +1,5 @@
 ﻿using CoreEntities.Model;
+using CoreEntities.Model.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,5 +17,9 @@ namespace LogicBusiness.Repository
         Task DeleteSpaceCascadeAsync(string spaceId);
 
         Task<List<Space>> GetSpacesByUserAsync(string userId, string? teamId = null);
+
+        Task<List<SpaceBriefDto>> GetSpacesByUserIdAsync(string userId);
+        Task<List<SpaceBriefDto>> GetSpacesByTeamIdAsync(string teamId);
+        Task<SpaceBriefDto?> GetSpaceByIdAsync(string spaceId);
     }
 }

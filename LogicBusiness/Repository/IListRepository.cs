@@ -1,4 +1,5 @@
 ﻿using CoreEntities.Model;
+using CoreEntities.Model.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,5 +18,8 @@ namespace LogicBusiness.Repository
 
         Task<List<List>> GetBySpaceIdAsync(string spaceId);
         Task<List<List>> GetByFolderIdAsync(string folderId);
+
+        Task<List<ListBriefDto>> GetListsBySpaceIdAsync(string spaceId);
+        Task<List<ListBriefDto>> GetListsByUserIdAsync(string userId);
     }
 }

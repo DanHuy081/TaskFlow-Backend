@@ -69,5 +69,14 @@ namespace LogicBusiness.Service
 
             return _mapper.Map<List<SpaceDto>>(spaces);
         }
+
+        public Task<List<SpaceBriefDto>> GetSpacesByUserIdAsync(string userId)
+          => _repo.GetSpacesByUserIdAsync(userId);
+
+        public Task<List<SpaceBriefDto>> GetSpacesByTeamIdAsync(string teamId)
+            => _repo.GetSpacesByTeamIdAsync(teamId);
+
+        public Task<SpaceBriefDto?> GetSpaceByIdAsync(string spaceId)
+             => _repo.GetSpaceByIdAsync(spaceId);
     }
 }

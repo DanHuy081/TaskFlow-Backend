@@ -37,6 +37,7 @@ namespace LogicBusiness.Service
             {
                 UserId = Guid.NewGuid().ToString(),
                 Username = dto.Username,
+                FullName = dto.FullName,
                 Email = dto.Email,
                 Role = "Member",
                 PasswordHash = hash,

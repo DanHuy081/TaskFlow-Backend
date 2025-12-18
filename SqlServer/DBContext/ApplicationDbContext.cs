@@ -35,6 +35,11 @@ namespace SqlServer.Data
         public DbSet<TimeEntryFL> TimeEntries { get; set; }
         public DbSet<CustomFieldFL> CustomFields { get; set; }
         public DbSet<TaskCustomFieldValueFL> TaskCustomFieldValues { get; set; }
+        public DbSet<Conversation> Conversations { get; set; }
+        public DbSet<ChatMessage> ChatMessages { get; set; } // Lưu ý tên DbSet
+        public DbSet<AIAction> AIActions { get; set; }
+        public DbSet<KnowledgeChunk> KnowledgeChunks { get; set; }
+        public DbSet<ConversationSummary> ConversationSummaries { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -156,6 +161,25 @@ namespace SqlServer.Data
                 .WithMany(t => t.Spaces)
                 .HasForeignKey(s => s.TeamId)
                 .OnDelete(DeleteBehavior.Cascade); // <--- QUAN TRỌNG
+
+            modelBuilder.Entity<Conversation>()
+                .HasMany(c => c.Messages)
+                .WithOne(m => m.Conversation)
+                .HasForeignKey(m => m.ConversationId)
+                .OnDelete(DeleteBehavior.Cascade); // Xóa hội thoại thì xóa luôn tin nhắn
+
+            // Config relationship Message -> AIActions (1-1 hoặc 1-n tùy logic, ở đây để 1-n cho chắc)
+            modelBuilder.Entity<ChatMessage>()
+                .HasMany<AIAction>()
+                .WithOne(a => a.Message)
+                .HasForeignKey(a => a.MessageId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ConversationSummary>()
+                .HasKey(x => x.ConversationId);
+
+            modelBuilder.Entity<ConversationSummary>()
+                .ToTable("ConversationSummaries");
         }
     }
 }

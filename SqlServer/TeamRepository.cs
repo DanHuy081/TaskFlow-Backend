@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SqlServer.Data;
+using CoreEntities.Model.DTOs;
 
 namespace SqlServer
 {
@@ -175,6 +176,22 @@ namespace SqlServer
         public async Task<UserFL?> GetUserByEmailAsync(string email)
         {
             return await _context.UserFLs.FirstOrDefaultAsync(u => u.Email == email);
+        }
+
+        public async Task<List<TeamBriefDto>> GetTeamsByUserIdAsync(string userId)
+        {
+            var data = await (
+                from tm in _context.Set<TeamMember>()
+                join t in _context.Set<Team>() on tm.TeamId equals t.TeamId
+                where tm.UserId == userId
+                select new TeamBriefDto
+                {
+                    TeamId = t.TeamId.ToString(),
+                    Name = t.Name
+                }
+            ).Distinct().ToListAsync();
+
+            return data;
         }
     }
 }
