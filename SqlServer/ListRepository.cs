@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SqlServer.Data;
+using CoreEntities.Model.DTOs;
+using System.Collections;
 
 namespace SqlServer
 {
@@ -64,6 +66,38 @@ namespace SqlServer
             return await _context.Lists
                 .Where(l => l.FolderId == folderId)
                 .ToListAsync();
+        }
+
+        public async Task<List<ListBriefDto>> GetListsBySpaceIdAsync(string spaceId)
+        {
+            return await _context.Set<List>()
+                .Where(l => l.SpaceId.ToString() == spaceId)
+                .Select(l => new ListBriefDto
+                {
+                    ListId = l.ListId.ToString(),
+                    SpaceId = l.SpaceId.ToString(),
+                    Name = l.Name
+                })
+                .ToListAsync();
+        }
+
+        public async Task<List<ListBriefDto>> GetListsByUserIdAsync(string userId)
+        {
+            // user -> teammembers -> spaces -> lists
+            var data = await (
+                from tm in _context.Set<TeamMember>()
+            join s in _context.Set<Space>() on tm.TeamId equals s.TeamId
+                join l in _context.Set<List>() on s.SpaceId equals l.SpaceId
+                where tm.UserId == userId
+                select new ListBriefDto
+                {
+                    ListId = l.ListId.ToString(),
+                    SpaceId = s.SpaceId.ToString(),
+                    Name = l.Name
+                }
+            ).Distinct().ToListAsync();
+
+            return data;
         }
     }
 }

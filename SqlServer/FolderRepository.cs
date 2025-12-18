@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SqlServer.Data;
+using CoreEntities.Model.DTOs;
 
 namespace SqlServer
 {
@@ -50,5 +51,38 @@ namespace SqlServer
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<List<FolderBriefDto>> GetFoldersBySpaceIdAsync(string spaceId)
+        {
+            return await _context.Set<Folder>()
+                .Where(f => f.SpaceId.ToString() == spaceId)
+                .Select(f => new FolderBriefDto
+                {
+                    FolderId = f.FolderId.ToString(),
+                    SpaceId = f.SpaceId.ToString(),
+                    Name = f.Name
+                })
+                .ToListAsync();
+        }
+
+        public async Task<List<FolderBriefDto>> GetFoldersByUserIdAsync(string userId)
+        {
+            // user -> teammembers -> spaces -> folders
+            var data = await (
+                from tm in _context.Set<TeamMember>()
+                join s in _context.Set<Space>() on tm.TeamId equals s.TeamId
+                join f in _context.Set<Folder>() on s.SpaceId equals f.SpaceId
+                where tm.UserId == userId
+                select new FolderBriefDto
+                {
+                    FolderId = f.FolderId.ToString(),
+                    SpaceId = f.SpaceId.ToString(),
+                    Name = f.Name
+                }
+            ).Distinct().ToListAsync();
+
+            return data;
+        }
     }
 }
+

@@ -17,5 +17,9 @@ namespace LogicBusiness.UseCase
         Task<List<ListDto>> GetByFolderAsync(string folderId);
         Task UpdateAsync(List list);
         Task DeleteAsync(string id);
+
+        //-----
+        Task<List<ListBriefDto>> GetListsByUserIdAsync(string userId);
+        Task<List<ListBriefDto>> GetListsBySpaceIdAsync(string spaceId);
     }
 }

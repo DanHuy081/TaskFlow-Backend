@@ -15,5 +15,6 @@ namespace LogicBusiness.Repository
         Task UpdateAsync(TaskFL task);
         Task DeleteAsync(string id);
         Task<IEnumerable<TaskFL>> GetByListAsync(string listId);
+        Task<List<TaskFL>> GetTasksByUserIdAsync(string userId);
     }
 }

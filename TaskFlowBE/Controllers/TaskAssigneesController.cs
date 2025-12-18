@@ -1,5 +1,6 @@
 ﻿using CoreEntities.Model;
 using CoreEntities.Model.DTOs;
+using LogicBusiness.Service;
 using LogicBusiness.UseCase;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,8 +23,8 @@ namespace TaskFlowBE.Controllers
             return Ok(await _service.GetAllAsync());
         }
 
-        [HttpGet("{taskId}")]
-        public async Task<IActionResult> GetByTask(string taskId)
+        [HttpGet("task/{taskId}/assignees")]
+        public async Task<IActionResult> GetTaskAssignees(string taskId)
         {
             var result = await _service.GetByTaskIdAsync(taskId);
             return Ok(result);
