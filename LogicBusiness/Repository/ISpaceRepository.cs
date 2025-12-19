@@ -21,5 +21,6 @@ namespace LogicBusiness.Repository
         Task<List<SpaceBriefDto>> GetSpacesByUserIdAsync(string userId);
         Task<List<SpaceBriefDto>> GetSpacesByTeamIdAsync(string teamId);
         Task<SpaceBriefDto?> GetSpaceByIdAsync(string spaceId);
+        Task<PersonalSpaceDto> GetOrCreatePersonalSpaceAsync(string userIdString);
     }
 }

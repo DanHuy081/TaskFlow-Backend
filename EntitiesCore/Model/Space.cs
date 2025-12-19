@@ -35,9 +35,14 @@ namespace CoreEntities.Model
 
         [Column("DateUpdated")]
         public DateTime? DateUpdated { get; set; }
+        [Column("IsPersonal")]
+        public bool? IsPersonal { get; set; }
+        [Column("UserId")]
+        public Guid? UserId { get; set; }
 
         // Một Space có nhiều Folder
         public ICollection<Folder> Folders { get; set; } = new List<Folder>();
         public virtual Team Teams { get; set; }
+        public virtual List Lists { get; set; }
     }
 }
