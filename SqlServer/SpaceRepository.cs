@@ -211,6 +211,78 @@ namespace SqlServer
                 })
                 .FirstOrDefaultAsync();
         }
+
+        public async Task<PersonalSpaceDto> GetOrCreatePersonalSpaceAsync(string userIdString)
+        {
+            // 1. Chuyển đổi UserId từ string sang Guid để khớp với DB
+            if (!Guid.TryParse(userIdString, out Guid userGuid))
+            {
+                throw new ArgumentException("UserId không hợp lệ");
+            }
+
+            // 2. Tìm Space có cờ IsPersonal = true của User này
+            var personalSpace = await _context.Spaces
+                .FirstOrDefaultAsync(s => s.UserId == userGuid && s.IsPersonal == true);
+
+            // 3. Nếu chưa có -> TỰ ĐỘNG TẠO (Auto Create)
+            if (personalSpace == null)
+            {
+                // Tạo Space mới
+                personalSpace = new Space
+                {
+                    SpaceId = Guid.NewGuid().ToString(), // DB là nvarchar nên để ToString()
+                    Name = "Không gian cá nhân",
+                    UserId = userGuid, // DB là uniqueidentifier
+                    TeamId = null,     // Không thuộc team nào
+                    IsPersonal = true, // Đánh dấu là Personal
+                    IsPrivate = true,
+                    DateCreated = DateTime.Now,
+                    DateUpdated = DateTime.Now,
+                    Color = "#8e44ad" // Màu tím giống hình
+                };
+                _context.Spaces.Add(personalSpace);
+
+                // TẠO LUÔN 1 LIST MẶC ĐỊNH (Bắt buộc phải có List mới tạo được Task)
+                var defaultList = new List // Thay 'ListEntity' bằng tên class List của bạn
+                {
+                    ListId = Guid.NewGuid().ToString(),
+                    Name = "Công việc của tôi",
+                    SpaceId = personalSpace.SpaceId,
+                    DateCreated = DateTime.Now
+                    // Nếu bảng List có UserId thì gán thêm userGuid vào
+                };
+                _context.Lists.Add(defaultList);
+
+                await _context.SaveChangesAsync();
+            }
+
+            // 4. Tính toán số liệu thống kê (Để hiển thị Header)
+
+            // Tìm ListId mặc định để trả về cho FE
+            // (Tìm list đầu tiên trong Space này)
+            var defaultListId = await _context.Lists
+                .Where(l => l.SpaceId == personalSpace.SpaceId)
+                .Select(l => l.ListId)
+                .FirstOrDefaultAsync();
+
+            // Đếm Task: Join từ Task -> List -> Space
+            // Giả sử bảng Task có cột ListId
+            var queryTasks = _context.Tasks
+                .Where(t => t.List.SpaceId == personalSpace.SpaceId);
+
+            int total = await queryTasks.CountAsync();
+            int completed = await queryTasks.CountAsync(t => t.Status == "DONE" || t.Status == "COMPLETE");
+
+            return new PersonalSpaceDto
+            {
+                SpaceId = personalSpace.SpaceId,
+                SpaceName = personalSpace.Name,
+                DefaultListId = defaultListId,
+                TotalTasks = total,
+                CompletedTasks = completed,
+                CompletionPercentage = total == 0 ? 0 : Math.Round((double)completed / total * 100, 1)
+            };
+        }
     }
 }
 

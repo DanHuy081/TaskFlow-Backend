@@ -38,10 +38,9 @@ namespace CoreEntities.Model
 
         [Column("DateUpdated")]
         public DateTime? DateUpdated { get; set; }
-        [Column("VectorData")]
-        public string? VectorData { get; set; }
-
+        
         // Quan hệ 1 List có nhiều Task
         public ICollection<TaskFL> Tasks { get; set; } = new List<TaskFL>();
+        public virtual Space Space{ get; set; }
     }
 }

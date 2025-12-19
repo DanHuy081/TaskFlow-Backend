@@ -141,7 +141,8 @@ builder.Services.AddScoped<IKnowledgeRepository, KnowledgeRepository>();
 builder.Services.AddScoped<IConversationSummaryRepository, ConversationSummaryRepository>();
 builder.Services.AddScoped<ISummaryService, SummaryService>();
 builder.Services.AddSingleton<IAIModelFactory, AIModelFactory>();
-
+builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 // -------------------------
 // 3. Build App

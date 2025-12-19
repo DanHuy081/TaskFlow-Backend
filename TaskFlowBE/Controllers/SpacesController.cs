@@ -74,5 +74,25 @@ namespace TaskFlowBE.Controllers
 
             return Ok(spaces);
         }
+
+        // GET: api/Spaces/personal
+        [HttpGet("personal")]
+        public async Task<IActionResult> GetPersonalWorkspace()
+        {
+            // Lấy UserId từ Token (Nó là string)
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            try
+            {
+                var result = await _service.GetPersonalWorkspaceAsync(userId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

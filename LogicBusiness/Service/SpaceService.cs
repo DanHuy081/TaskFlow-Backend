@@ -78,5 +78,10 @@ namespace LogicBusiness.Service
 
         public Task<SpaceBriefDto?> GetSpaceByIdAsync(string spaceId)
              => _repo.GetSpaceByIdAsync(spaceId);
+
+        public async Task<PersonalSpaceDto> GetPersonalWorkspaceAsync(string userId)
+        {
+            return await _repo.GetOrCreatePersonalSpaceAsync(userId);
+        }
     }
 }

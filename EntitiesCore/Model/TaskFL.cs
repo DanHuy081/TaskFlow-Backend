@@ -58,12 +58,11 @@ namespace CoreEntities.Model
 
         [Column("Url")]
         public string? Url { get; set; }
-        [Column("VectorData")]
-        public string? VectorData { get; set; }
+        
 
         public ICollection<Comment> Comments { get; set; }
         public ICollection<Attachment> Attachments { get; set; }
-        public List List { get; set; }
+        public virtual List List { get; set; }
         public ICollection<TaskAssignee> TaskAssignees { get; set; }
         public ICollection<ChecklistFL> Checklists { get; set; }
 
