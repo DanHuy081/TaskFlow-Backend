@@ -1,4 +1,4 @@
-﻿using CoreEntities.Model;
+﻿using Space = CoreEntities.Model.Space;
 using CoreEntities.Model.DTOs;
 using System;
 using System.Collections.Generic;

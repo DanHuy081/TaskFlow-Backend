@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SqlServer.Data;
 using CoreEntities.Model.DTOs;
+using Team = CoreEntities.Model.Team;
 
 namespace SqlServer
 {
@@ -182,7 +183,7 @@ namespace SqlServer
         {
             var data = await (
                 from tm in _context.Set<TeamMember>()
-                join t in _context.Set<Team>() on tm.TeamId equals t.TeamId
+                join t in _context.Set<CoreEntities.Model.Team>() on tm.TeamId equals t.TeamId
                 where tm.UserId == userId
                 select new TeamBriefDto
                 {

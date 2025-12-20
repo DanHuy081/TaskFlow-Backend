@@ -66,5 +66,17 @@ namespace SqlServer
                 .OrderByDescending(t => t.DateCreated)
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<TaskFL>> GetTasksDueInIntervalAsync(DateTime start, DateTime end)
+        {
+            // Ví dụ: Lấy các task có Deadline từ [Bây giờ] đến [1 tiếng nữa]
+            // Và trạng thái chưa hoàn thành (giả sử Status != "Completed")
+            return await _context.Tasks
+                                 .Where(t => t.StartDate >= start &&
+                                             t.DateClosed <= end &&
+                                             t.Status != "Completed")
+                                 .Include(t => t.TaskAssignees) // Nhớ Include bảng phân công để biết báo cho ai
+                                 .ToListAsync();
+        }
     }
 }

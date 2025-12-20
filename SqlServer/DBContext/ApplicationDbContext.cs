@@ -40,6 +40,7 @@ namespace SqlServer.Data
         public DbSet<AIAction> AIActions { get; set; }
         public DbSet<KnowledgeChunk> KnowledgeChunks { get; set; }
         public DbSet<ConversationSummary> ConversationSummaries { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -61,6 +62,21 @@ namespace SqlServer.Data
                 .WithOne(c => c.Task)
                 .HasForeignKey(c => c.TaskId)
                 .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<TaskAssignee>(entity =>
+            {
+                // 1. Chỉ định khóa chính (nếu là khóa phức hợp gồm TaskId và UserId)
+                entity.HasKey(e => new { e.TaskId, e.UserId });
+
+                // 2. Cấu hình mối quan hệ với Task
+                entity.HasOne(d => d.Tasks)       // Biến điều hướng trong TaskAssignee là TaskFL
+                      .WithMany(p => p.TaskAssignees)  // Biến danh sách trong Task là Assignees
+                      .HasForeignKey(d => d.TaskId) // <--- QUAN TRỌNG NHẤT: Bắt buộc dùng cột TaskId
+                      .OnDelete(DeleteBehavior.Cascade); // (Tùy chọn) Xóa Task thì xóa luôn phân công
+
+                // 3. Cấu hình mối quan hệ với User (nếu cần)
+                // entity.HasOne(d => d.UserFLs)...
+            });
+
 
             modelBuilder.Entity<Attachment>()
                 .HasOne(a => a.Task)
@@ -97,6 +113,11 @@ namespace SqlServer.Data
                 .HasOne(a => a.UserFLs)
                 .WithMany(u => u.TaskAssignees)
                 .HasForeignKey(a => a.UserId);
+
+            modelBuilder.Entity<TaskAssignee>()
+                .HasOne(ta => ta.Tasks)       // Một Assignee thuộc về 1 TaskFL
+                .WithMany(t => t.TaskAssignees)    // Một Task có nhiều Assignees
+                .HasForeignKey(ta => ta.TaskId); // <--- CHỐT: Khóa ngoại là TaskId
 
             modelBuilder.Entity<GoalFL>()
                 .HasOne(g => g.Teams)

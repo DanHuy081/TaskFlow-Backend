@@ -28,4 +28,16 @@ namespace CoreEntities.Model.DTOs
         public bool? IsArchived { get; set; }
         public string? Url { get; set; }
     }
+
+    public class TaskEntity
+    {
+        public Guid TaskId { get; set; }
+        public string Name { get; set; }
+        public string Status { get; set; } // Todo | Doing | Done | Pending
+        public DateTime CreatedAt { get; set; }
+        public DateTime? DueDate { get; set; }
+
+        public Guid ListId { get; set; }
+        public ListEntity List { get; set; }
+    }
 }

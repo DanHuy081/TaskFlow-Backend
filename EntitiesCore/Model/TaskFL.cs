@@ -67,5 +67,6 @@ namespace CoreEntities.Model
         public ICollection<ChecklistFL> Checklists { get; set; }
 
         public ICollection<TaskCustomFieldValueFL> CustomFieldValues { get; set; }
+        
     }
 }

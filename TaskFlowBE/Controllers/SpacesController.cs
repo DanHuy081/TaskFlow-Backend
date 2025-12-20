@@ -5,6 +5,7 @@ using LogicBusiness.UseCase;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Space = CoreEntities.Model.Space;
 
 namespace TaskFlowBE.Controllers
 {
