@@ -281,6 +281,24 @@ namespace SqlServer.Migrations
                     b.ToTable("Conversations");
                 });
 
+            modelBuilder.Entity("CoreEntities.Model.ConversationSummary", b =>
+                {
+                    b.Property<Guid>("ConversationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DateUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Summary")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ConversationId");
+
+                    b.ToTable("ConversationSummaries", (string)null);
+                });
+
             modelBuilder.Entity("CoreEntities.Model.CustomFieldFL", b =>
                 {
                     b.Property<string>("FieldId")
@@ -390,6 +408,35 @@ namespace SqlServer.Migrations
                     b.ToTable("Goals");
                 });
 
+            modelBuilder.Entity("CoreEntities.Model.KnowledgeChunk", b =>
+                {
+                    b.Property<Guid>("KnowledgeChunkId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Tags")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("KnowledgeChunkId");
+
+                    b.ToTable("KnowledgeChunks");
+                });
+
             modelBuilder.Entity("CoreEntities.Model.List", b =>
                 {
                     b.Property<string>("ListId")
@@ -422,20 +469,20 @@ namespace SqlServer.Migrations
                         .HasColumnName("Priority");
 
                     b.Property<string>("SpaceId")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("nvarchar(450)")
                         .HasColumnName("SpaceId");
 
                     b.Property<string>("Status")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("Status");
 
-                    b.Property<string>("VectorData")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("VectorData");
-
                     b.HasKey("ListId");
 
                     b.HasIndex("FolderId");
+
+                    b.HasIndex("SpaceId")
+                        .IsUnique()
+                        .HasFilter("[SpaceId] IS NOT NULL");
 
                     b.ToTable("Lists");
                 });
@@ -458,6 +505,10 @@ namespace SqlServer.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("DateUpdated");
 
+                    b.Property<bool?>("IsPersonal")
+                        .HasColumnType("bit")
+                        .HasColumnName("IsPersonal");
+
                     b.Property<bool?>("IsPrivate")
                         .HasColumnType("bit")
                         .HasColumnName("IsPrivate");
@@ -473,6 +524,10 @@ namespace SqlServer.Migrations
                     b.Property<string>("TeamId")
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("TeamId");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("UserId");
 
                     b.HasKey("SpaceId");
 
@@ -621,10 +676,6 @@ namespace SqlServer.Migrations
                     b.Property<string>("Url")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("Url");
-
-                    b.Property<string>("VectorData")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("VectorData");
 
                     b.HasKey("Id");
 
@@ -907,6 +958,12 @@ namespace SqlServer.Migrations
                     b.HasOne("CoreEntities.Model.Folder", null)
                         .WithMany("Lists")
                         .HasForeignKey("FolderId");
+
+                    b.HasOne("CoreEntities.Model.Space", "Space")
+                        .WithOne("Lists")
+                        .HasForeignKey("CoreEntities.Model.List", "SpaceId");
+
+                    b.Navigation("Space");
                 });
 
             modelBuilder.Entity("CoreEntities.Model.Space", b =>
@@ -1030,6 +1087,9 @@ namespace SqlServer.Migrations
             modelBuilder.Entity("CoreEntities.Model.Space", b =>
                 {
                     b.Navigation("Folders");
+
+                    b.Navigation("Lists")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("CoreEntities.Model.TaskFL", b =>

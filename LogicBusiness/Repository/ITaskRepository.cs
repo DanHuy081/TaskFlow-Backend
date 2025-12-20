@@ -16,5 +16,8 @@ namespace LogicBusiness.Repository
         Task DeleteAsync(string id);
         Task<IEnumerable<TaskFL>> GetByListAsync(string listId);
         Task<List<TaskFL>> GetTasksByUserIdAsync(string userId);
+        // Tìm các task có hạn chót nằm trong khoảng thời gian (start, end) và chưa hoàn thành
+        Task<IEnumerable<TaskFL>> GetTasksDueInIntervalAsync(DateTime start, DateTime end);
+
     }
 }

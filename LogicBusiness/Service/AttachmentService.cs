@@ -1,7 +1,9 @@
 ﻿using CoreEntities.Model;
 using LogicBusiness.Repository;
 using LogicBusiness.UseCase;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,10 +15,12 @@ namespace LogicBusiness.Service
     public class AttachmentService : IAttachmentService
     {
         private readonly IAttachmentRepository _repo;
+        private readonly IWebHostEnvironment _environment;
 
-        public AttachmentService(IAttachmentRepository repo)
+        public AttachmentService(IAttachmentRepository repo, IWebHostEnvironment environment)
         {
             _repo = repo;
+            _environment = environment;
         }
 
         public async Task<IEnumerable<Attachment>> GetAllAsync() => await _repo.GetAllAsync();
@@ -27,40 +31,33 @@ namespace LogicBusiness.Service
 
         public async Task<Attachment> GetByIdAsync(string id) => await _repo.GetByIdAsync(id);
 
-        public async Task<Attachment> UploadAsync(IFormFile file, string? taskId, string? commentId, string uploadedBy, string rootPath)
+        public async Task<string> UploadAsync(IFormFile file, string folderName)
         {
             if (file == null || file.Length == 0)
-                throw new ArgumentException("File không hợp lệ.");
+                throw new ArgumentException("File không hợp lệ");
 
-            string folder = Path.Combine(rootPath, "uploads", taskId ?? commentId ?? "misc");
-            if (!Directory.Exists(folder))
-                Directory.CreateDirectory(folder);
+            // 1. Tạo đường dẫn thư mục lưu: wwwroot/uploads/tasks
+            string uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads", folderName);
 
-            string uniqueFileName = $"{Guid.NewGuid()}_{file.FileName}";
-            string filePath = Path.Combine(folder, uniqueFileName);
+            // Tạo thư mục nếu chưa tồn tại
+            if (!Directory.Exists(uploadsFolder))
+                Directory.CreateDirectory(uploadsFolder);
 
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            // 2. Tạo tên file duy nhất (dùng Guid)
+            // Ví dụ: avatar.png -> 3f8a...2b1c_avatar.png
+            string uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
+
+            // 3. Đường dẫn vật lý đầy đủ
+            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            // 4. Lưu file vào ổ cứng
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
             {
-                await file.CopyToAsync(stream);
+                await file.CopyToAsync(fileStream);
             }
 
-            string relativeUrl = Path.Combine("uploads", taskId ?? commentId ?? "misc", uniqueFileName).Replace("\\", "/");
-
-            var attachment = new Attachment
-            {
-                AttachmentId = Guid.NewGuid().ToString(),
-                TaskId = taskId,
-                CommentId = commentId,
-                FileName = file.FileName,
-                Url = relativeUrl,
-                SizeBytes = file.Length,
-                MimeType = file.ContentType,
-                UploadedBy = uploadedBy,
-                DateAdded = DateTime.UtcNow
-            };
-
-            await _repo.AddAsync(attachment);
-            return attachment;
+            // 5. Trả về đường dẫn tương đối để Client truy cập được (Ví dụ: /uploads/tasks/abc.png)
+            return $"/uploads/{folderName}/{uniqueFileName}";
         }
 
         public async Task DeleteAsync(string id, string rootPath)

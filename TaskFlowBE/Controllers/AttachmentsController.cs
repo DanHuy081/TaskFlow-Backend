@@ -1,4 +1,5 @@
-﻿using LogicBusiness.UseCase;
+﻿using CoreEntities.Model.DTOs;
+using LogicBusiness.UseCase;
 using Microsoft.AspNetCore.Mvc;
 
 namespace TaskFlowBE.Controllers
@@ -37,12 +38,30 @@ namespace TaskFlowBE.Controllers
             return Ok(list);
         }
 
-        //[HttpPost("upload")]
-        //public async Task<IActionResult> Upload([FromForm] IFormFile file, [FromForm] string? taskId, [FromForm] string? commentId, [FromForm] string uploadedBy)
-        //{
-        //    var result = await _service.UploadAsync(file, taskId, commentId, uploadedBy, _env.ContentRootPath);
-        //    return Ok(result);
-        //}
+        [HttpPost("upload")]
+        [Consumes("multipart/form-data")] // Quan trọng để Swagger hiển thị nút upload
+        public async Task<IActionResult> Upload([FromForm] UploadFileDto request)
+        {
+            try
+            {
+                // Gọi service để lưu file vật lý
+                string filePath = await _service.UploadAsync(request.File, "attachments");
+
+                // TODO: Tại đây bạn có thể gọi thêm Repository để lưu filePath, TaskId, CommentId vào Database
+                // Ví dụ: await _attachmentRepo.AddAsync(new Attachment { Url = filePath, TaskId = request.TaskId ... });
+
+                return Ok(new
+                {
+                    message = "Upload thành công",
+                    url = filePath,
+                    taskId = request.TaskId // Trả lại để kiểm tra chơi
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)

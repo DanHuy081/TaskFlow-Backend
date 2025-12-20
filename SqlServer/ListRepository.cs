@@ -86,7 +86,7 @@ namespace SqlServer
             // user -> teammembers -> spaces -> lists
             var data = await (
                 from tm in _context.Set<TeamMember>()
-            join s in _context.Set<Space>() on tm.TeamId equals s.TeamId
+            join s in _context.Set<CoreEntities.Model.Space>() on tm.TeamId equals s.TeamId
                 join l in _context.Set<List>() on s.SpaceId equals l.SpaceId
                 where tm.UserId == userId
                 select new ListBriefDto

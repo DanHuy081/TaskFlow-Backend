@@ -13,7 +13,7 @@ namespace CoreEntities.Mapping
     {
         public SpaceMappingProfile()
         {
-            CreateMap<Space, SpaceDto>();
+            CreateMap<Model.Space, SpaceDto>();
         }
     }
 }

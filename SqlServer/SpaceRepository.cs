@@ -1,4 +1,4 @@
-﻿using CoreEntities.Model;
+﻿using Space = CoreEntities.Model.Space;
 using LogicBusiness.Repository;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SqlServer.Data;
 using CoreEntities.Model.DTOs;
+using CoreEntities.Model;
 
 namespace SqlServer
 {

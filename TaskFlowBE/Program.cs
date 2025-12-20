@@ -15,6 +15,8 @@ using CoreEntities.Mapping;
 using System.Security.Claims;
 using System;
 
+using TaskFlowBE.Hubs;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // -------------------------
@@ -143,6 +145,10 @@ builder.Services.AddScoped<ISummaryService, SummaryService>();
 builder.Services.AddSingleton<IAIModelFactory, AIModelFactory>();
 builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddSignalR();
+builder.Services.AddHostedService<DeadlineWorker>();
 
 // -------------------------
 // 3. Build App
@@ -169,6 +175,8 @@ app.UseAuthentication();
 app.UseCors("AllowAll");
 
 app.UseAuthorization();
+
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 app.MapControllers();
 

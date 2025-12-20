@@ -70,7 +70,7 @@ namespace SqlServer
             // user -> teammembers -> spaces -> folders
             var data = await (
                 from tm in _context.Set<TeamMember>()
-                join s in _context.Set<Space>() on tm.TeamId equals s.TeamId
+                join s in _context.Set<CoreEntities.Model.Space>() on tm.TeamId equals s.TeamId
                 join f in _context.Set<Folder>() on s.SpaceId equals f.SpaceId
                 where tm.UserId == userId
                 select new FolderBriefDto
