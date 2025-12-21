@@ -11,6 +11,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using LogicBusiness.Helpers;
 
 namespace LogicBusiness.Service
 {
@@ -18,11 +19,14 @@ namespace LogicBusiness.Service
     {
         private readonly IUserRepository _repo;
         private readonly IConfiguration _config;
+        private readonly IEmailService _emailService;
 
-        public AuthService(IUserRepository repo, IConfiguration config)
+        public AuthService(IUserRepository repo, IConfiguration config, IEmailService emailService)
         {
             _repo = repo;
             _config = config;
+            _emailService = emailService;
+
         }
 
         // REGISTER -----------------------
@@ -100,6 +104,47 @@ namespace LogicBusiness.Service
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public async Task ForgotPasswordAsync(string email)
+        {
+            var user = await _repo.GetByEmailAsync(email);
+            if (user == null) return; // Không tiết lộ email tồn tại hay không
+
+            user.ResetPasswordToken = Guid.NewGuid();
+            user.ResetPasswordExpire = DateTime.UtcNow.AddMinutes(15);
+            user.IsResetPasswordUsed = false;
+
+            await _repo.UpdateAsync(user);
+
+            var resetLink = $"https://your-fe-domain/reset-password?token={user.ResetPasswordToken}";
+
+            await _emailService.SendAsync(
+                user.Email,
+                "Reset your password",
+                $"Click vào link để đặt lại mật khẩu: {resetLink}"
+            );
+        }
+
+        public async Task ResetPasswordAsync(Guid token, string newPassword)
+        {
+            var user = await _repo.GetByResetTokenAsync(token);
+            if (user == null)
+                throw new Exception("Token không hợp lệ hoặc đã hết hạn");
+
+            // Hash password
+            PasswordHasher.CreatePasswordHash(
+                newPassword,
+                out byte[] hash,
+                out byte[] salt);
+
+            user.PasswordHash = hash;
+            user.PasswordSalt = salt;
+            user.IsResetPasswordUsed = true;
+            user.ResetPasswordToken = null;
+            user.ResetPasswordExpire = null;
+
+            await _repo.UpdateAsync(user);
         }
     }
 }

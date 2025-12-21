@@ -12,6 +12,7 @@ using CoreEntities.Model.DTOs;
 using LogicBusiness.UseCase;
 using Microsoft.AspNetCore.Authorization;
 using LogicBusiness.Repository;
+using LogicBusiness.Service;
 
 namespace TaskFlowBE.Controllers
 {
@@ -84,6 +85,25 @@ namespace TaskFlowBE.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword(
+        ForgotPasswordRequestDto dto)
+        {
+            await _auth.ForgotPasswordAsync(dto.Email);
+            return Ok("Nếu email tồn tại, link reset đã được gửi");
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword(
+            ResetPasswordRequestDto dto)
+        {
+            await _auth.ResetPasswordAsync(
+                dto.Token,
+                dto.NewPassword);
+
+            return Ok("Đổi mật khẩu thành công");
         }
     }
 }

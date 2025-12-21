@@ -62,5 +62,16 @@ namespace SqlServer
             _context.UserFLs.Add(user);
             await _context.SaveChangesAsync();
         }
+
+
+        public async Task<UserFL> GetByResetTokenAsync(Guid token)
+        {
+            return await _context.UserFLs.FirstOrDefaultAsync(u =>
+                u.ResetPasswordToken == token &&
+                u.ResetPasswordExpire > DateTime.UtcNow &&
+                u.IsResetPasswordUsed == false);
+        }
+
+    
     }
 }
