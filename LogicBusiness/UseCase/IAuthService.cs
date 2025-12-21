@@ -11,6 +11,9 @@ namespace LogicBusiness.UseCase
     {
         Task<string?> LoginAsync(LoginDto dto);
         Task<bool> RegisterAsync(RegisterDto dto);
+
+        Task ForgotPasswordAsync(string email);
+        Task ResetPasswordAsync(Guid token, string newPassword);
     }
 
 }

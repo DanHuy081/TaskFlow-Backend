@@ -50,5 +50,8 @@ namespace CoreEntities.Model
         // Quan hệ với TeamMembers (User → TeamMembers)
         public ICollection<TeamMember> TeamMembers { get; set; }
         public ICollection<TaskAssignee> TaskAssignees { get; set; }
+        public Guid? ResetPasswordToken { get; set; }
+        public DateTime? ResetPasswordExpire { get; set; }
+        public bool? IsResetPasswordUsed { get; set; }
     }
 }
