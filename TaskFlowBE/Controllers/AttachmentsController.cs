@@ -39,23 +39,25 @@ namespace TaskFlowBE.Controllers
         }
 
         [HttpPost("upload")]
-        [Consumes("multipart/form-data")] // Quan trọng để Swagger hiển thị nút upload
+        [Consumes("multipart/form-data")]
         public async Task<IActionResult> Upload([FromForm] UploadFileDto request)
         {
+            // Kiểm tra request
+            if (request.File == null || request.File.Length == 0)
+                return BadRequest("Vui lòng chọn file.");
+
             try
             {
-                // Gọi service để lưu file vật lý
-                string filePath = await _service.UploadAsync(request.File, "attachments");
+                // GỌI HÀM MỚI: Truyền đủ 4 tham số bắt buộc
+                // rootPathFromController để null cũng được vì Service tự lấy WebRootPath
+                var result = await _service.UploadAsync(
+                    request.File,
+                    request.TaskId,
+                    request.CommentId,
+                    request.UploadedBy ?? "UnknownUser" // Xử lý nếu null
+                );
 
-                // TODO: Tại đây bạn có thể gọi thêm Repository để lưu filePath, TaskId, CommentId vào Database
-                // Ví dụ: await _attachmentRepo.AddAsync(new Attachment { Url = filePath, TaskId = request.TaskId ... });
-
-                return Ok(new
-                {
-                    message = "Upload thành công",
-                    url = filePath,
-                    taskId = request.TaskId // Trả lại để kiểm tra chơi
-                });
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -66,8 +68,18 @@ namespace TaskFlowBE.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {
-            await _service.DeleteAsync(id, _env.ContentRootPath);
-            return NoContent();
+            try
+            {
+                // GỌI HÀM MỚI: Chỉ truyền 1 tham số là ID
+                // (Service đã tự lo việc tìm đường dẫn gốc để xóa file vật lý)
+                await _service.DeleteAsync(id);
+
+                return Ok(new { message = "Xóa thành công" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }
