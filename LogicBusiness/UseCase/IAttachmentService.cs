@@ -14,7 +14,7 @@ namespace LogicBusiness.UseCase
         Task<IEnumerable<Attachment>> GetByTaskIdAsync(string taskId);
         Task<IEnumerable<Attachment>> GetByCommentIdAsync(string commentId);
         Task<Attachment> GetByIdAsync(string id);
-        Task<string> UploadAsync(IFormFile file, string folderName);
-        Task DeleteAsync(string id, string rootPath);
+        Task<Attachment> UploadAsync(IFormFile file, string? taskId, string? commentId, string uploadedBy, string rootPathFromController = null);
+        Task DeleteAsync(string id);
     }
 }
