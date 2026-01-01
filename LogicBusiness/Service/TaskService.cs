@@ -63,6 +63,7 @@ namespace LogicBusiness.Service
             entity.DateCreated = DateTime.UtcNow;
             entity.DateUpdated = DateTime.UtcNow;
             entity.IsArchived = false;
+            entity.Status = dto.Status;
 
             await _taskRepository.AddAsync(entity);
 
@@ -114,6 +115,15 @@ namespace LogicBusiness.Service
         public async Task<List<TaskFL>> GetTasksByUserIdAsync(string userId)
         {
             return await _taskRepository.GetTasksByUserIdAsync(userId);
+        }
+        public async Task<IEnumerable<TaskFL>> GetTasksByTeamIdAsync(string teamId, int take = 20)
+        {
+            return await _taskRepository.GetTasksByTeamIdAsync(teamId, take);
+        }
+
+        public async Task<IEnumerable<TaskFL>> GetTasksByListIdAsync(string listId, int take = 20)
+        {
+            return await _taskRepository.GetTasksByListIdAsync(listId, take);
         }
     }
 }

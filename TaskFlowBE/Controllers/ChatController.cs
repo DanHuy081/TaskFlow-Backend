@@ -122,6 +122,32 @@ namespace TaskFlowBE.Controllers
             return Ok(new { ok = true });
         }
 
+        [HttpGet("conversation/{id:guid}")]
+        public async Task<IActionResult> GetConversation(Guid id)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            try
+            {
+                var conversation = await _chatService.GetConversationAsync(id, userId);
 
+                // Map sang DTO gọn gàng để trả về FE
+                return Ok(new
+                {
+                    id = conversation.ConversationId,
+                    title = conversation.Title,
+                    messages = conversation.Messages.Select(m => new
+                    {
+                        id = m.MessageId,
+                        role = m.Role,
+                        content = m.Content,
+                        timestamp = m.DateCreated
+                    }).OrderBy(m => m.timestamp)
+                });
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound("Conversation not found");
+            }
+        }
     }
 }

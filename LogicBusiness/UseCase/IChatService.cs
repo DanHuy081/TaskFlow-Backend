@@ -17,6 +17,8 @@ namespace LogicBusiness.UseCase
         Task<List<Conversation>> GetHistoryAsync(string userId);
 
         Task DeleteConversationAsync(Guid conversationId, string userId);
+
+        Task<Conversation> GetConversationAsync(Guid conversationId, string userId);
     }
 }
 

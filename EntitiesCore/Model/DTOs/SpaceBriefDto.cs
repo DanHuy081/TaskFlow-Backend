@@ -11,5 +11,6 @@ namespace CoreEntities.Model.DTOs
         public string SpaceId { get; set; } = "";
         public string TeamId { get; set; } = "";
         public string Name { get; set; } = "";
+        public string? Description { get; set; }
     }
 }

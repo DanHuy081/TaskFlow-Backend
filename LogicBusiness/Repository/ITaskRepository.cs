@@ -19,5 +19,7 @@ namespace LogicBusiness.Repository
         // Tìm các task có hạn chót nằm trong khoảng thời gian (start, end) và chưa hoàn thành
         Task<IEnumerable<TaskFL>> GetTasksDueInIntervalAsync(DateTime start, DateTime end);
 
+        Task<IEnumerable<TaskFL>> GetTasksByTeamIdAsync(string teamId, int take = 20);
+        Task<IEnumerable<TaskFL>> GetTasksByListIdAsync(string listId, int take = 20);
     }
 }
