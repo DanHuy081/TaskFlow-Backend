@@ -36,7 +36,7 @@ namespace CoreEntities.Model
         [Column("DateUpdated")]
         public DateTime? DateUpdated { get; set; }
         [Column("IsPersonal")]
-        public bool? IsPersonal { get; set; }
+        public bool? IsPersonal { get; set; } = false;
         [Column("UserId")]
         public Guid? UserId { get; set; }
 

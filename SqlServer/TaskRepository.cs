@@ -78,5 +78,33 @@ namespace SqlServer
                                  .Include(t => t.TaskAssignees) // Nhớ Include bảng phân công để biết báo cho ai
                                  .ToListAsync();
         }
+
+        public async Task<IEnumerable<CoreEntities.Model.TaskFL>> GetTasksByTeamIdAsync(string teamId, int take = 20)
+        {
+            // Query lấy task thuộc về Team (thông qua chuỗi quan hệ List -> Folder -> Space -> Team)
+            // Lưu ý: Sửa lại tên property (Folder, Space...) cho khớp với Model thực tế của bạn
+            return await _context.Tasks
+         // 👇 QUAN TRỌNG: Nối bảng để lấy người làm
+         .Include(t => t.TaskAssignees)
+             .ThenInclude(ta => ta.UserFLs)
+         .Include(t => t.List)
+             .ThenInclude(l => l.Space)
+         .Where(t => t.List.Space.TeamId == teamId)
+         .OrderByDescending(t => t.DateCreated)
+         .Take(take)
+         .ToListAsync();
+        }
+
+        public async Task<IEnumerable<TaskFL>> GetTasksByListIdAsync(string listId, int take = 20)
+        {
+            return await _context.Tasks
+         // 👇 QUAN TRỌNG: Nối bảng để lấy người làm
+         .Include(t => t.TaskAssignees)
+             .ThenInclude(ta => ta.UserFLs) // ⚠️ Lưu ý: Kiểm tra tên biến này trong Model TaskAssignee của bạn là UserFL hay UserFLs
+         .Where(t => t.ListId == listId)
+         .OrderByDescending(t => t.DateCreated)
+         .Take(take)
+         .ToListAsync();
+        }
     }
 }

@@ -12,6 +12,8 @@ namespace CoreEntities.Model.DTOs
         public string Message { get; set; }
         public Guid? CurrentTeamId { get; set; } // Context team hiện tại
         public Guid? CurrentSpaceId { get; set; }
+
+        public Guid? CurrentListId { get; set; }
     }
 
     public class ChatResponseDto

@@ -32,5 +32,7 @@ namespace LogicBusiness.Repository
         Task<UserFL?> GetUserByEmailAsync(string email);
 
         Task<List<TeamBriefDto>> GetTeamsByUserIdAsync(string userId);
+
+        Task<List<Team>> GetTeamsWithMembersByUserIdAsync(string userId);
     }
 }

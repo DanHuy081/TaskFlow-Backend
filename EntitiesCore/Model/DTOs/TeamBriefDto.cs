@@ -10,5 +10,6 @@ namespace CoreEntities.Model.DTOs
     {
         public string TeamId { get; set; } = "";
         public string Name { get; set; } = "";
+        public object Description { get; set; }
     }
 }

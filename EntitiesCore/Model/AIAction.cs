@@ -33,4 +33,18 @@ namespace CoreEntities.Model
         [ForeignKey("MessageId")]
         public virtual ChatMessage Message { get; set; }
     }
+
+    public class AIActionResponse
+    {
+        public string action { get; set; }
+        public AIActionData data { get; set; }
+    }
+
+    public class AIActionData
+    {
+        public string title { get; set; }
+        public string description { get; set; }
+        public string dueDate { get; set; }
+        public string assigneeName { get; set; }
+    }
 }

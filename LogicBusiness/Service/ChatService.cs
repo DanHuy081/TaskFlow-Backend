@@ -10,7 +10,6 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-
 using DBChatMessage = CoreEntities.Model.ChatMessage;
 
 namespace LogicBusiness.Service
@@ -39,9 +38,7 @@ namespace LogicBusiness.Service
             _chatRepository = chatRepository;
             _taskService = taskService;
             _knowledgeRepository = knowledgeRepository;
-
             _model = modelFactory.Create();
-
             _summaryService = summaryService;
             _teamService = teamService;
             _spaceService = spaceService;
@@ -53,9 +50,23 @@ namespace LogicBusiness.Service
             return await _chatRepository.GetUserConversationsAsync(userId);
         }
 
+        public async Task<Conversation> GetConversationAsync(Guid conversationId, string userId)
+        {
+            var conversation = await _chatRepository.GetConversationByIdAsync(conversationId, userId);
+            if (conversation == null) throw new KeyNotFoundException("Conversation not found");
+            return conversation;
+        }
+
+        public async Task DeleteConversationAsync(Guid conversationId, string userId)
+        {
+            var conv = await _chatRepository.GetConversationByIdAsync(conversationId, userId);
+            if (conv == null) throw new KeyNotFoundException("Conversation not found");
+            await _chatRepository.DeleteConversationAsync(conversationId, userId);
+        }
+
         public async Task<ChatResponseDto> ProcessChatAsync(ChatRequestDto request, string userId)
         {
-            // 1) Get/Create Conversation
+            // 1. Get or Create Conversation
             Conversation conversation;
             if (request.ConversationId == null)
             {
@@ -75,7 +86,7 @@ namespace LogicBusiness.Service
                 if (conversation == null) throw new KeyNotFoundException("Conversation not found");
             }
 
-            // 2) Save User Message
+            // 2. Save User Message
             var userMsg = new DBChatMessage
             {
                 MessageId = Guid.NewGuid(),
@@ -85,26 +96,85 @@ namespace LogicBusiness.Service
             };
             await _chatRepository.AddMessageAsync(userMsg);
 
-            // 3) Retrieve knowledge (RAG)
+            // 3. Search Knowledge Base (RAG)
             var knowledge = await _knowledgeRepository.SearchAsync(request.Message, take: 3);
 
-            // 4) Build prompt (có currentSpaceId để trả lời theo đúng UI)
+            // 4. Build Context & Prompt
             var prompt = await BuildPromptAsync(
-                conversationId: conversation.ConversationId,
-                conversation: conversation,
-                userMessage: request.Message,
-                userId: userId,
-                knowledge: knowledge,
-                currentSpaceId: request.CurrentSpaceId
+                conversation.ConversationId,
+                conversation,
+                request.Message,
+                userId,
+                knowledge,
+                request.CurrentSpaceId,
+                request.CurrentTeamId,
+                request.CurrentListId
             );
 
-            // 5) Call Gemini
+           
+            // 5. Call Gemini AI
             var response = await _model.GenerateContent(prompt);
             var aiReply = response?.Text;
-            if (string.IsNullOrWhiteSpace(aiReply))
-                aiReply = "Đã xử lý xong yêu cầu.";
 
-            // 6) Save AI Reply
+            // --- ⚡ BẮT ĐẦU ĐOẠN CODE MỚI: XỬ LÝ ACTION TẠO TASK ---
+            // 1. Làm sạch JSON trước (Xóa ```json và ``` và khoảng trắng)
+            var jsonClean = (aiReply ?? "").Replace("```json", "").Replace("```", "").Trim();
+
+            // 2. Kiểm tra trên chuỗi ĐÃ LÀM SẠCH (jsonClean) thay vì chuỗi gốc
+            if (!string.IsNullOrEmpty(jsonClean) && jsonClean.StartsWith("{") && jsonClean.Contains("create_task"))
+            {
+                try
+                {
+                    // Deserialize chuỗi đã làm sạch
+                    var actionData = JsonSerializer.Deserialize<AIActionResponse>(jsonClean, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    if (actionData?.action == "create_task" && actionData.data != null)
+                    {
+                        if (request.CurrentListId == null)
+                        {
+                            aiReply = "⚠️ Tôi cần biết bạn muốn tạo task vào List nào. Vui lòng chọn một List cụ thể trên màn hình nhé!";
+                        }
+                        else
+                        {
+                            // Map dữ liệu sang TaskCreateDto
+                            var newTaskDto = new TaskCreateDto
+                            {
+                                Name = actionData.data.title ?? "Task mới",
+                                
+                                ListId = request.CurrentListId.Value.ToString(),
+                                Status = "TO DO",
+
+                                // Xử lý ngày tháng an toàn hơn
+                                DueDate = !string.IsNullOrEmpty(actionData.data.dueDate) && DateTime.TryParse(actionData.data.dueDate, out var parsedDate)
+                                          ? parsedDate
+                                          : null,
+
+                                Priority = "Medium"
+                            };
+
+                            // Gọi Service tạo Task thật
+                            await _taskService.CreateAsync(newTaskDto);
+
+                            // Tạo phản hồi giả lập đè lên JSON cũ
+                            aiReply = $"✅ **Đã tạo task thành công!**\n\n" +
+                                      $"- **Công việc:** {newTaskDto.Name}\n" +
+                                      $"- **Hạn:** {(newTaskDto.DueDate.HasValue ? newTaskDto.DueDate.Value.ToString("dd/MM/yyyy") : "Không có")}\n" +
+                                      $"- **Status:** TO DO";
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("AI Action Error: " + ex.ToString());
+                    // Nếu lỗi JSON thì kệ, để nó hiện text gốc để mình biết đường sửa tiếp
+                }
+            }
+            // --- ⚡ KẾT THÚC ĐOẠN CODE MỚI ---
+
+            if (string.IsNullOrWhiteSpace(aiReply))
+                aiReply = "Xin lỗi, tôi không thể xử lý yêu cầu lúc này.";
+
+            // 6. Save AI Response
             var aiMessage = new DBChatMessage
             {
                 MessageId = Guid.NewGuid(),
@@ -114,16 +184,14 @@ namespace LogicBusiness.Service
             };
             await _chatRepository.AddMessageAsync(aiMessage);
 
-            // ✅ Update summary sau khi đã có cả user + assistant
+            // 7. Update Summary & Title
             await _summaryService.UpdateSummaryIfNeededAsync(conversation.ConversationId);
 
-            // 7) Update Title
             if (conversation.Title == "New Chat")
             {
                 conversation.Title = request.Message.Length > 40
                     ? request.Message.Substring(0, 40) + "..."
                     : request.Message;
-
                 await _chatRepository.UpdateConversationAsync(conversation);
             }
 
@@ -135,7 +203,7 @@ namespace LogicBusiness.Service
             };
         }
 
-        // ---------------- Helpers ----------------
+        // ================= HELPER METHODS =================
 
         private async Task<string> BuildPromptAsync(
             Guid conversationId,
@@ -143,185 +211,257 @@ namespace LogicBusiness.Service
             string userMessage,
             string userId,
             List<KnowledgeChunk> knowledge,
-            Guid? currentSpaceId)
+            Guid? currentSpaceId,
+            Guid? currentTeamId,
+            Guid? currentListId)
         {
-            // Lấy tối đa 8 message gần nhất để giảm prompt
-            var msgs = (conversation.Messages ?? new List<DBChatMessage>())
-                .OrderBy(m => m.DateCreated)
-                .TakeLast(8)
-                .ToList();
-
             var sb = new StringBuilder();
 
-            sb.AppendLine("Bạn là trợ lý cho ứng dụng quản lý công việc TaskFlow.");
-            sb.AppendLine("Trả lời tiếng Việt, rõ ràng, ngắn gọn. Nếu cần, liệt kê bullet.");
-            sb.AppendLine("Bạn được cung cấp dữ liệu nội bộ trong prompt. Không được nói 'tôi không truy cập được dữ liệu hệ thống/tài khoản'. Nếu thiếu dữ liệu, hãy hỏi lại 1 câu cụ thể.");
-            sb.AppendLine("QUY TẮC: Nếu có 'NGỮ CẢNH UI HIỆN TẠI', hãy ưu tiên trả lời theo Space đó. Chỉ khi người dùng hỏi phạm vi khác thì mới mở rộng.");
+            // --- 1. SYSTEM PROMPT ---
+            sb.AppendLine("SYSTEM INSTRUCTIONS:");
+            sb.AppendLine("Bạn là TaskFlow AI - Chuyên gia tư vấn quản lý dự án & hiệu suất.");
+            sb.AppendLine();
+            sb.AppendLine($"THỜI GIAN HỆ THỐNG HIỆN TẠI: {DateTime.Now:yyyy-MM-dd HH:mm:ss} (Thứ {DateTime.Now.DayOfWeek})");
+            sb.AppendLine("PHÂN LOẠI CÂU TRẢ LỜI:");
+            sb.AppendLine("1. KHI USER HỎI VỀ DỮ LIỆU (VD: 'Tôi có task nào?', 'Ai đang làm task A?'):");
+            sb.AppendLine("   - BẮT BUỘC trả lời dựa trên [CONTEXT DATA]. Nếu không thấy trong Context, bảo không tìm thấy.");
+            sb.AppendLine("2. KHI USER HỎI GỢI Ý / TƯ VẤN (VD: 'Nên thêm task gì?', 'Lập kế hoạch cho team Marketing'):");
+            sb.AppendLine("   - Hãy đóng vai trò cố vấn chuyên môn. Sử dụng kiến thức rộng của bạn về quản lý dự án.");
+            sb.AppendLine("   - Phân tích [CONTEXT DATA] (Tên Team, Mô tả dự án, Task hiện tại) để đưa ra gợi ý sát thực tế nhất.");
+            sb.AppendLine("   - Đề xuất các bước đi cụ thể, quy trình chuẩn (Agile/Scrum) phù hợp với tên Team/Space.");
+            sb.AppendLine();
+            sb.AppendLine("PHONG CÁCH TRẢ LỜI:");
+            sb.AppendLine("- Thân thiện, chuyên nghiệp, dùng Emoji hợp lý.");
+            sb.AppendLine("- Sử dụng Markdown (Bold, List) để trình bày đẹp mắt.");
+            sb.AppendLine();
+            sb.AppendLine("CHẾ ĐỘ RA LỆNH (ACTION MODE):");
+            sb.AppendLine("Nếu người dùng yêu cầu TẠO TASK (VD: 'Tạo task A', 'Thêm công việc B', 'Giao task C cho D'), BẠN KHÔNG ĐƯỢC TRẢ LỜI BẰNG LỜI.");
+            sb.AppendLine("Thay vào đó, hãy trả về DUY NHẤT một chuỗi JSON (không markdown, không giải thích) theo định dạng sau:");
+            sb.AppendLine("{");
+            sb.AppendLine("  \"action\": \"create_task\",");
+            sb.AppendLine("  \"data\": {");
+            sb.AppendLine("    \"title\": \"<Tên task trích xuất được>\",");
+            sb.AppendLine("    \"description\": \"<Mô tả chi tiết nếu có>\",");
+            sb.AppendLine("    \"dueDate\": \"<Ngày hết hạn định dạng yyyy-MM-dd (Nếu user nói 'ngày mai' hãy tự tính ra ngày) hoặc null>\",");
+            sb.AppendLine("    \"assigneeName\": \"<Tên người được giao (nếu có) hoặc null>\"");
+            sb.AppendLine("  }");
+            sb.AppendLine("}");
+            sb.AppendLine("Lưu ý: Nếu không tìm thấy thông tin nào (như ngày, người giao), hãy để null.");
+            sb.AppendLine();
+            sb.AppendLine("QUY TẮC HIỂN THỊ TASK:");
+            sb.AppendLine("- Khi liệt kê danh sách task, BẮT BUỘC dùng định dạng Markdown Link chứa ID để user có thể click vào.");
+            sb.AppendLine("- Định dạng: [Tên Task](task://<TaskId>)");
+            sb.AppendLine("- Ví dụ: [Làm báo cáo](task://123-abc-xyz) - Trạng thái: Todo");
             sb.AppendLine();
 
-            // 1) Summary
-            var summary = await _summaryService.GetSummaryAsync(conversationId);
-            if (!string.IsNullOrWhiteSpace(summary))
-            {
-                sb.AppendLine("TÓM TẮT NGỮ CẢNH (Conversation Summary):");
-                sb.AppendLine(summary);
-                sb.AppendLine();
-            }
+            // --- CONTEXT DATA START ---
+            sb.AppendLine("[CONTEXT DATA START]");
 
-            // 2) Knowledge
-            if (knowledge == null || knowledge.Count == 0)
-            {
-                knowledge = await _knowledgeRepository.SearchByTagsAsync(new[] { "schema", "project" }, take: 1);
-            }
+            // ---------------------------------------------------------
+            // 🧠 LOGIC SUY LUẬN CONTEXT (Hierarchy: List -> Space -> Team)
+            // ---------------------------------------------------------
+            string resolvedTeamId = currentTeamId?.ToString();
 
-            if (knowledge != null && knowledge.Count > 0)
+            if (string.IsNullOrEmpty(resolvedTeamId) && currentSpaceId != null)
             {
-                sb.AppendLine("KIẾN THỨC DỰ ÁN (trích từ tài liệu nội bộ):");
-                foreach (var k in knowledge)
+                var currentSpace = await _spaceService.GetSpaceByIdAsync(currentSpaceId.Value.ToString());
+                if (currentSpace != null && !string.IsNullOrEmpty(currentSpace.TeamId))
                 {
-                    sb.AppendLine($"--- {k.Title} | tags: {k.Tags} ---");
-                    var content = k.Content ?? "";
-                    if (content.Length > 4000) content = content.Substring(0, 4000) + "...";
-                    sb.AppendLine(content);
-                    sb.AppendLine();
+                    resolvedTeamId = currentSpace.TeamId;
                 }
             }
 
-            // 3) UI current space context
+            // 1. UI CONTEXT
+            sb.AppendLine("### CURRENT UI CONTEXT (Ngữ cảnh làm việc):");
+
+            if (currentListId != null)
+            {
+                sb.AppendLine($"- Đang đứng trong List ID: {currentListId} (Hãy tập trung vào danh sách này)");
+            }
+
+            if (!string.IsNullOrEmpty(resolvedTeamId))
+            {
+                var currentTeam = await _teamService.GetByIdAsync(resolvedTeamId);
+                if (currentTeam != null)
+                {
+                    sb.AppendLine($"- TEAM HIỆN TẠI: {currentTeam.Name}");
+                    sb.AppendLine($"- MÔ TẢ TEAM: {currentTeam.Description ?? "Chưa có mô tả (Hãy gợi ý user bổ sung mô tả để AI hiểu rõ hơn)"}");
+                }
+            }
+            else
+            {
+                sb.AppendLine("- User đang không ở trong Team cụ thể nào (Global View).");
+            }
+
             if (currentSpaceId != null)
             {
                 var space = await _spaceService.GetSpaceByIdAsync(currentSpaceId.Value.ToString());
                 if (space != null)
                 {
-                    sb.AppendLine("NGỮ CẢNH UI HIỆN TẠI (User đang đứng ở Space này):");
-                    sb.AppendLine(JsonSerializer.Serialize(new { currentSpace = space }, new JsonSerializerOptions { WriteIndented = true }));
-                    sb.AppendLine();
+                    sb.AppendLine($"- PROJECT/SPACE HIỆN TẠI: {space.Name}");
+                    sb.AppendLine($"- MÔ TẢ PROJECT: {space.Description ?? "Chưa có mô tả"}");
+                }
+            }
+
+            // 2. Knowledge Base (Docs)
+            if (knowledge != null && knowledge.Any())
+            {
+                sb.AppendLine("### REFERENCE DOCUMENTS (Tài liệu tham khảo):");
+                foreach (var k in knowledge)
+                {
+                    var content = k.Content?.Length > 500 ? k.Content.Substring(0, 500) + "..." : k.Content;
+                    sb.AppendLine($"- {k.Title}: {content}");
+                }
+            }
+
+            // 3. Data Injection (Tasks) - SMART SCOPE DETECTION
+            // Kích hoạt khi hỏi Task HOẶC hỏi Gợi ý
+            bool isSuggestionQuery = userMessage.ToLower().Contains("gợi ý") ||
+                                     userMessage.ToLower().Contains("thêm") ||
+                                     userMessage.ToLower().Contains("kế hoạch") ||
+                                     userMessage.ToLower().Contains("ý tưởng");
+
+            if (LooksLikeTaskQuery(userMessage) || isSuggestionQuery)
+            {
+                var (statusFilter, take) = ExtractTaskFilters(userMessage);
+                List<TaskFL> tasksSource = new List<TaskFL>();
+                string sourceNote = "";
+
+                // 👇 LOGIC MỚI: PHÁT HIỆN Ý ĐỊNH NGƯỜI DÙNG ĐỂ CHỌN PHẠM VI (SCOPE)
+                string msgLower = userMessage.ToLower();
+                bool userAskForTeam = msgLower.Contains("team") || msgLower.Contains("nhóm") || msgLower.Contains("tất cả") || msgLower.Contains("toàn bộ");
+                bool userAskForSpace = msgLower.Contains("dự án") || msgLower.Contains("project") || msgLower.Contains("space");
+
+                // CASE 1: Nếu User hỏi đích danh "Team" -> Lấy Task cả Team (Bỏ qua List hiện tại)
+                if (userAskForTeam && !string.IsNullOrEmpty(resolvedTeamId))
+                {
+                    tasksSource = (await _taskService.GetTasksByTeamIdAsync(resolvedTeamId, take)).ToList();
+                    sourceNote = $"trong toàn bộ Team (theo yêu cầu của bạn)";
+                }
+                // CASE 2: Nếu User hỏi đích danh "Dự án/Space" -> Lấy theo Space (Tạm thời fallback về Team nếu chưa có hàm Space riêng)
+                else if (userAskForSpace && (currentSpaceId != null || !string.IsNullOrEmpty(resolvedTeamId)))
+                {
+                    // Fallback: Lấy theo Team nhưng filter lại (hoặc gọi hàm Space nếu có)
+                    tasksSource = (await _taskService.GetTasksByTeamIdAsync(resolvedTeamId, take)).ToList();
+                    sourceNote = "trong Dự án này";
+                }
+                // CASE 3: Mặc định (Ưu tiên ngữ cảnh hẹp nhất: List -> Team -> Personal)
+                else if (currentListId != null)
+                {
+                    tasksSource = (await _taskService.GetTasksByListIdAsync(currentListId.Value.ToString(), take)).ToList();
+                    sourceNote = "trong List hiện tại";
+                }
+                else if (!string.IsNullOrEmpty(resolvedTeamId))
+                {
+                    tasksSource = (await _taskService.GetTasksByTeamIdAsync(resolvedTeamId, take)).ToList();
+                    sourceNote = "trong Team này";
                 }
                 else
                 {
-                    sb.AppendLine("NGỮ CẢNH UI HIỆN TẠI: currentSpaceId có nhưng không tìm thấy Space trong DB.");
-                    sb.AppendLine();
+                    tasksSource = (await _taskService.GetTasksByUserIdAsync(userId)).ToList();
+                    sourceNote = "của cá nhân bạn";
                 }
-            }
-            else
-            {
-                sb.AppendLine("NGỮ CẢNH UI HIỆN TẠI: currentSpaceId = null (User chưa chọn Space).");
-                sb.AppendLine();
-            }
 
-            // 4) Conversation history
-            if (msgs.Count > 0)
-            {
-                sb.AppendLine("LỊCH SỬ HỘI THOẠI (tham khảo):");
-                foreach (var m in msgs)
+                // Lọc theo trạng thái
+                if (!string.IsNullOrEmpty(statusFilter))
                 {
-                    var who = (m.Role ?? "").Equals("user", StringComparison.OrdinalIgnoreCase) ? "User" : "Assistant";
-                    sb.AppendLine($"{who}: {m.Content}");
-                }
-                sb.AppendLine();
-            }
-
-            // 5) Inject domain data theo intent
-
-            // Tasks
-            if (LooksLikeTaskQuery(userMessage))
-            {
-                var (status, take) = ExtractTaskFilters(userMessage);
-                var tasks = await _taskService.GetTasksByUserIdAsync(userId);
-
-                if (!string.IsNullOrWhiteSpace(status))
-                {
-                    tasks = tasks
-                        .Where(t => t.Status != null &&
-                                    t.Status.Equals(status, StringComparison.OrdinalIgnoreCase))
-                        .ToList();
+                    tasksSource = tasksSource.Where(t => t.Status?.Equals(statusFilter, StringComparison.OrdinalIgnoreCase) == true).ToList();
                 }
 
-                var taskResult = tasks
-                    .OrderBy(t => t.DueDate ?? DateTime.MaxValue)
+                var leanTasks = tasksSource
+                    .OrderByDescending(t => t.DateCreated)
+                    .Take(take)
                     .Select(t => new
                     {
-                        Name = t.Name,
+                        Id = t.Id, // ID để mở Modal (Lưu ý: Nếu Model bạn dùng Id thì sửa thành t.Id)
+                        Task = t.Name,
                         Status = t.Status,
-                        DueDate = t.DueDate?.ToString("dd/MM/yyyy")
-                    })
-                    .Take(take)
-                    .ToList();
+                        Priority = t.Priority,
 
-                sb.AppendLine("DỮ LIỆU TASKS (nội bộ hệ thống):");
-                sb.AppendLine(JsonSerializer.Serialize(new { tasks = taskResult }, new JsonSerializerOptions { WriteIndented = true }));
-                sb.AppendLine();
+                        // 👇 Logic nối tên tất cả người làm
+                        Assignee = (t.TaskAssignees != null && t.TaskAssignees.Any())
+                            ? string.Join(", ", t.TaskAssignees.Select(ta => ta.UserFLs != null ? (ta.UserFLs.FullName ?? ta.UserFLs.Username) : "Unknown"))
+                            : "Unassigned",
+
+                        Due = t.DueDate?.ToString("dd/MM/yyyy")
+                    });
+
+                sb.AppendLine($"### EXISTING TASKS ({sourceNote} - Dùng để tham khảo tiến độ):");
+                sb.AppendLine(JsonSerializer.Serialize(leanTasks));
             }
 
-            // Teams
-            if (LooksLikeTeamQuery(userMessage))
+            // 4. Teams & Members
+            if (LooksLikeTeamQuery(userMessage) || isSuggestionQuery)
             {
-                var teams = await _teamService.GetTeamsByUserIdAsync(userId);
-                sb.AppendLine("DỮ LIỆU TEAMS CỦA USER (nội bộ hệ thống):");
-                sb.AppendLine(JsonSerializer.Serialize(new { teams }, new JsonSerializerOptions { WriteIndented = true }));
-                sb.AppendLine();
+                var teams = await _teamService.GetTeamsWithMembersByUserIdAsync(userId);
+
+                var leanTeams = teams.Select(t => new
+                {
+                    TeamName = t.Name,
+                    Description = t.Description,
+                    IsCurrentTeam = !string.IsNullOrEmpty(resolvedTeamId) && t.TeamId.ToString() == resolvedTeamId,
+                    Members = t.TeamMembers?.Select(tm => new
+                    {
+                        Name = tm.UserFLs?.FullName ?? tm.UserFLs?.Username ?? "Unknown User",
+                        Email = tm.UserFLs?.Email,
+                        Role = tm.Role
+                    }).ToList()
+                });
+
+                sb.AppendLine("### USER'S TEAMS (Danh sách thành viên):");
+                sb.AppendLine(JsonSerializer.Serialize(leanTeams));
             }
 
-            // Spaces:
-            // - Nếu đang có currentSpaceId và user hỏi "space này" thì không cần bơm all spaces
-            // - Nếu currentSpaceId == null hoặc user hỏi kiểu "tất cả spaces" thì bơm
-            if (LooksLikeSpaceQuery(userMessage) && (currentSpaceId == null || AsksAllScope(userMessage)))
+            // 5. Spaces
+            if (LooksLikeSpaceQuery(userMessage))
             {
                 var spaces = await _spaceService.GetSpacesByUserIdAsync(userId);
-                sb.AppendLine("DỮ LIỆU SPACES CỦA USER (nội bộ hệ thống):");
-                sb.AppendLine(JsonSerializer.Serialize(new { spaces }, new JsonSerializerOptions { WriteIndented = true }));
+                var leanSpaces = spaces.Select(s => new { SpaceName = s.Name, Id = s.SpaceId });
+                sb.AppendLine("### USER'S SPACES:");
+                sb.AppendLine(JsonSerializer.Serialize(leanSpaces));
+            }
+
+            sb.AppendLine("[CONTEXT DATA END]");
+            sb.AppendLine();
+
+            // --- HISTORY ---
+            var historyMsgs = (conversation.Messages ?? new List<DBChatMessage>())
+                                .OrderBy(m => m.DateCreated)
+                                .TakeLast(6)
+                                .ToList();
+
+            if (historyMsgs.Any())
+            {
+                sb.AppendLine("CONVERSATION HISTORY:");
+                foreach (var msg in historyMsgs)
+                {
+                    var role = msg.Role == "user" ? "User" : "Assistant";
+                    sb.AppendLine($"{role}: {msg.Content}");
+                }
                 sb.AppendLine();
             }
 
-            // Lists (ưu tiên currentSpace)
-            if (LooksLikeListQuery(userMessage))
-            {
-                if (currentSpaceId != null && !AsksAllScope(userMessage))
-                {
-                    var lists = await _listService.GetListsBySpaceIdAsync(currentSpaceId.Value.ToString());
-                    sb.AppendLine("DỮ LIỆU LISTS TRONG CURRENT SPACE (nội bộ hệ thống):");
-                    sb.AppendLine(JsonSerializer.Serialize(new { lists }, new JsonSerializerOptions { WriteIndented = true }));
-                    sb.AppendLine();
-                }
-                else
-                {
-                    var lists = await _listService.GetListsByUserIdAsync(userId);
-                    sb.AppendLine("DỮ LIỆU LISTS CỦA USER (nội bộ hệ thống):");
-                    sb.AppendLine(JsonSerializer.Serialize(new { lists }, new JsonSerializerOptions { WriteIndented = true }));
-                    sb.AppendLine();
-                }
-            }
-
-            // 6) Final user question
-            sb.AppendLine("NGƯỜI DÙNG VỪA HỎI:");
-            sb.AppendLine(userMessage);
-            sb.AppendLine();
-            sb.AppendLine("Hãy trả lời:");
+            sb.AppendLine($"User Question: {userMessage}");
+            sb.AppendLine("Assistant Answer:");
 
             return sb.ToString();
         }
 
-        // ---------- Intent helpers ----------
+        // ================= INTENT DETECTION HELPERS =================
 
         private static bool LooksLikeTaskQuery(string text)
         {
             if (string.IsNullOrWhiteSpace(text)) return false;
             var t = text.ToLowerInvariant();
-
-            return t.Contains("task")
-                || t.Contains("công việc")
-                || t.Contains("todo")
-                || t.Contains("doing")
-                || t.Contains("done")
-                || t.Contains("cần làm")
-                || t.Contains("đang làm")
-                || t.Contains("hoàn thành");
+            return t.Contains("task") || t.Contains("công việc") || t.Contains("todo") ||
+                   t.Contains("doing") || t.Contains("done") || t.Contains("cần làm") ||
+                   t.Contains("đang làm") || t.Contains("hoàn thành") || t.Contains("dự án này");
         }
 
         private static (string? status, int take) ExtractTaskFilters(string text)
         {
             string? status = null;
-            int take = 15;
+            int take = 20;
 
             var t = (text ?? "").ToLowerInvariant();
 
@@ -332,12 +472,6 @@ namespace LogicBusiness.Service
             else if (Regex.IsMatch(t, @"\bdone\b") || t.Contains("hoàn thành") || t.Contains("xong"))
                 status = "Done";
 
-            var m = Regex.Match(t, @"\b(\d{1,2})\b");
-            if (m.Success && int.TryParse(m.Groups[1].Value, out var n))
-            {
-                if (n >= 1 && n <= 30) take = n;
-            }
-
             return (status, take);
         }
 
@@ -345,7 +479,7 @@ namespace LogicBusiness.Service
         {
             if (string.IsNullOrWhiteSpace(text)) return false;
             var t = text.ToLowerInvariant();
-            return t.Contains("team") || t.Contains("nhóm") || t.Contains("đội");
+            return t.Contains("team") || t.Contains("nhóm") || t.Contains("đội") || t.Contains("thành viên") || t.Contains("ai");
         }
 
         private static bool LooksLikeSpaceQuery(string text)
@@ -354,30 +488,5 @@ namespace LogicBusiness.Service
             var t = text.ToLowerInvariant();
             return t.Contains("space") || t.Contains("không gian") || t.Contains("workspace") || t.Contains("dự án");
         }
-
-        private static bool LooksLikeListQuery(string text)
-        {
-            if (string.IsNullOrWhiteSpace(text)) return false;
-            var t = text.ToLowerInvariant();
-            return t.Contains("list") || t.Contains("danh sách");
-        }
-
-        // user hỏi kiểu “tất cả”, “toàn bộ”, “all”
-        private static bool AsksAllScope(string text)
-        {
-            if (string.IsNullOrWhiteSpace(text)) return false;
-            var t = text.ToLowerInvariant();
-            return t.Contains("tất cả") || t.Contains("toàn bộ") || Regex.IsMatch(t, @"\ball\b");
-        }
-
-        public async Task DeleteConversationAsync(Guid conversationId, string userId)
-        {
-            // kiểm tra conversation thuộc về user
-            var conv = await _chatRepository.GetConversationByIdAsync(conversationId, userId);
-            if (conv == null) throw new KeyNotFoundException("Conversation not found");
-
-            await _chatRepository.DeleteConversationAsync(conversationId, userId);
-        }
-
     }
 }

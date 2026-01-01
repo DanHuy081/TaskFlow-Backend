@@ -112,5 +112,10 @@ namespace LogicBusiness.Service
         {
             return _repo.GetTeamsByUserIdAsync(userId);
         }
+
+        public async Task<List<Team>> GetTeamsWithMembersByUserIdAsync(string userId)
+        {
+            return await _repo.GetTeamsWithMembersByUserIdAsync(userId);
+        }
     }
 }

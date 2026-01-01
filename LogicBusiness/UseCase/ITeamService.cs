@@ -21,5 +21,6 @@ namespace LogicBusiness.UseCase
         //AI hiểu
         Task<List<TeamBriefDto>> GetTeamsByUserIdAsync(string userId);
 
+        Task<List<Team>> GetTeamsWithMembersByUserIdAsync(string userId);
     }
 }

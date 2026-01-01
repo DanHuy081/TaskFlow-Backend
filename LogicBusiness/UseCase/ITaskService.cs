@@ -18,5 +18,7 @@ namespace LogicBusiness.UseCase
         Task<TaskDto?> UpdateStatusAsync(string id, TaskStatusUpdateDto dto);
         Task<IEnumerable<TaskDto>> GetByListAsync(string listId);
         Task<List<TaskFL>> GetTasksByUserIdAsync(string userId);
+        Task<IEnumerable<TaskFL>> GetTasksByTeamIdAsync(string teamId, int take = 20);
+        Task<IEnumerable<TaskFL>> GetTasksByListIdAsync(string listId, int take = 20);
     }
 }
