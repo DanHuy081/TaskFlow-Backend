@@ -150,6 +150,8 @@ builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddSignalR();
 builder.Services.AddHostedService<DeadlineWorker>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
+builder.Services.AddScoped<IActivityService, ActivityService>();
 
 // -------------------------
 // 3. Build App
