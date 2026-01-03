@@ -49,33 +49,40 @@ namespace TaskFlowBE.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] TaskCreateDto dto)
         {
-            var result = await _taskService.CreateAsync(dto);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // 👇 Truyền userId vào Service
+            var result = await _taskService.CreateAsync(dto, userId);
             return Ok(result); // trả về DTO
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult> Update(string id, TaskUpdateDto dto)
         {
-            var updated = await _taskService.UpdateAsync(id, dto);
-            if (updated == null) return NotFound();
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _taskService.UpdateAsync(id, dto, userId); // Truyền thêm userId
 
-            return Ok(updated);
+            if (result == null) return NotFound();
+
+            return Ok(result);
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(string id)
         {
-            await _taskService.DeleteTaskAsync(id);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            await _taskService.DeleteTaskAsync(id, userId); // Truyền thêm userId
             return NoContent();
         }
 
         [HttpPatch("{id}/status")]
-        public async Task<IActionResult> UpdateStatus(string id, TaskStatusUpdateDto dto)
+        public async Task<IActionResult> UpdateStatus(string id, [FromBody] TaskStatusUpdateDto dto)
         {
-            var updated = await _taskService.UpdateStatusAsync(id, dto);
-            if (updated == null) return NotFound();
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _taskService.UpdateStatusAsync(id, dto, userId); // Truyền thêm userId
 
-            return Ok(updated);
+            if (result == null) return NotFound();
+            return Ok(result);
         }
 
         [HttpGet("by-list/{listId}")]

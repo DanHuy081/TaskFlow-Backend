@@ -41,6 +41,7 @@ namespace SqlServer.Data
         public DbSet<KnowledgeChunk> KnowledgeChunks { get; set; }
         public DbSet<ConversationSummary> ConversationSummaries { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<ActivityLog> activityLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

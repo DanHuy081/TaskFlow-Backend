@@ -12,10 +12,10 @@ namespace LogicBusiness.UseCase
     {
         Task<IEnumerable<TaskDto>> GetAllTasksAsync();
         Task<TaskFL> GetTaskByIdAsync(string id);
-        Task<TaskDto> CreateAsync(TaskCreateDto dto);
-        Task<TaskDto> UpdateAsync(string id, TaskUpdateDto dto);
-        Task DeleteTaskAsync(string id);
-        Task<TaskDto?> UpdateStatusAsync(string id, TaskStatusUpdateDto dto);
+        Task<TaskDto> CreateAsync(TaskCreateDto dto, string userId);
+        Task<TaskDto?> UpdateAsync(string id, TaskUpdateDto dto, string userId);
+        Task DeleteTaskAsync(string id, string userId);
+        Task<TaskDto?> UpdateStatusAsync(string id, TaskStatusUpdateDto dto, string userId);
         Task<IEnumerable<TaskDto>> GetByListAsync(string listId);
         Task<List<TaskFL>> GetTasksByUserIdAsync(string userId);
         Task<IEnumerable<TaskFL>> GetTasksByTeamIdAsync(string teamId, int take = 20);

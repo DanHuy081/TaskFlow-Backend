@@ -19,6 +19,8 @@ namespace LogicBusiness.UseCase
         Task DeleteConversationAsync(Guid conversationId, string userId);
 
         Task<Conversation> GetConversationAsync(Guid conversationId, string userId);
+
+        Task<string> ProcessPublicChatAsync(string message, string sessionId);
     }
 }
 

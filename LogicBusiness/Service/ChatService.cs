@@ -116,57 +116,77 @@ namespace LogicBusiness.Service
             var response = await _model.GenerateContent(prompt);
             var aiReply = response?.Text;
 
-            // --- ⚡ BẮT ĐẦU ĐOẠN CODE MỚI: XỬ LÝ ACTION TẠO TASK ---
-            // 1. Làm sạch JSON trước (Xóa ```json và ``` và khoảng trắng)
+            // --- ⚡ BẮT ĐẦU ĐOẠN CODE MỚI (ĐÃ SỬA): XỬ LÝ ACTION TẠO TASK (HỖ TRỢ MẢNG) ---
             var jsonClean = (aiReply ?? "").Replace("```json", "").Replace("```", "").Trim();
 
-            // 2. Kiểm tra trên chuỗi ĐÃ LÀM SẠCH (jsonClean) thay vì chuỗi gốc
-            if (!string.IsNullOrEmpty(jsonClean) && jsonClean.StartsWith("{") && jsonClean.Contains("create_task"))
+            // Kiểm tra xem là JSON Object {} hay JSON Array []
+            bool isJsonArray = jsonClean.StartsWith("[");
+            bool isJsonObject = jsonClean.StartsWith("{");
+
+            if (!string.IsNullOrEmpty(jsonClean) && (isJsonArray || isJsonObject) && jsonClean.Contains("create_task"))
             {
                 try
                 {
-                    // Deserialize chuỗi đã làm sạch
-                    var actionData = JsonSerializer.Deserialize<AIActionResponse>(jsonClean, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    List<AIActionResponse> actions = new List<AIActionResponse>();
+                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
-                    if (actionData?.action == "create_task" && actionData.data != null)
+                    // Case 1: AI trả về mảng nhiều task (như trong ảnh lỗi của bạn)
+                    if (isJsonArray)
+                    {
+                        actions = JsonSerializer.Deserialize<List<AIActionResponse>>(jsonClean, options) ?? new List<AIActionResponse>();
+                    }
+                    // Case 2: AI trả về 1 task lẻ
+                    else if (isJsonObject)
+                    {
+                        var singleAction = JsonSerializer.Deserialize<AIActionResponse>(jsonClean, options);
+                        if (singleAction != null) actions.Add(singleAction);
+                    }
+
+                    // Bắt đầu xử lý danh sách hành động
+                    if (actions.Any())
                     {
                         if (request.CurrentListId == null)
                         {
-                            aiReply = "⚠️ Tôi cần biết bạn muốn tạo task vào List nào. Vui lòng chọn một List cụ thể trên màn hình nhé!";
+                            aiReply = "⚠️ Tôi hiểu bạn muốn tạo task, nhưng tôi chưa biết tạo vào đâu. Vui lòng chọn một List cụ thể trên màn hình nhé!";
                         }
                         else
                         {
-                            // Map dữ liệu sang TaskCreateDto
-                            var newTaskDto = new TaskCreateDto
+                            var successReport = new StringBuilder();
+                            successReport.AppendLine("✅ **Đã thực hiện xong các yêu cầu:**\n");
+
+                            foreach (var act in actions)
                             {
-                                Name = actionData.data.title ?? "Task mới",
-                                
-                                ListId = request.CurrentListId.Value.ToString(),
-                                Status = "TO DO",
+                                if (act.action == "create_task" && act.data != null)
+                                {
+                                    // Map dữ liệu
+                                    var newTaskDto = new TaskCreateDto
+                                    {
+                                        Name = act.data.title ?? "Task mới",
+                                        ListId = request.CurrentListId.Value.ToString(),
+                                        Status = "TO DO",
+                                        DueDate = !string.IsNullOrEmpty(act.data.dueDate) && DateTime.TryParse(act.data.dueDate, out var parsedDate)
+                                                  ? parsedDate
+                                                  : null,
+                                        Priority = "Medium"
+                                    };
 
-                                // Xử lý ngày tháng an toàn hơn
-                                DueDate = !string.IsNullOrEmpty(actionData.data.dueDate) && DateTime.TryParse(actionData.data.dueDate, out var parsedDate)
-                                          ? parsedDate
-                                          : null,
+                                    // Gọi Service tạo Task
+                                    await _taskService.CreateAsync(newTaskDto, userId);
 
-                                Priority = "Medium"
-                            };
+                                    // Ghi log vào câu trả lời
+                                    successReport.AppendLine($"- Đã tạo: **{newTaskDto.Name}** (Hạn: {(newTaskDto.DueDate.HasValue ? newTaskDto.DueDate.Value.ToString("dd/MM") : "N/A")})");
+                                }
+                            }
 
-                            // Gọi Service tạo Task thật
-                            await _taskService.CreateAsync(newTaskDto);
-
-                            // Tạo phản hồi giả lập đè lên JSON cũ
-                            aiReply = $"✅ **Đã tạo task thành công!**\n\n" +
-                                      $"- **Công việc:** {newTaskDto.Name}\n" +
-                                      $"- **Hạn:** {(newTaskDto.DueDate.HasValue ? newTaskDto.DueDate.Value.ToString("dd/MM/yyyy") : "Không có")}\n" +
-                                      $"- **Status:** TO DO";
+                            // Cập nhật câu trả lời của AI thành báo cáo kết quả
+                            aiReply = successReport.ToString();
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("AI Action Error: " + ex.ToString());
-                    // Nếu lỗi JSON thì kệ, để nó hiện text gốc để mình biết đường sửa tiếp
+                    Console.WriteLine("AI Action Error: " + ex.Message);
+                    // Nếu lỗi parse JSON thì giữ nguyên text gốc để debug
                 }
             }
             // --- ⚡ KẾT THÚC ĐOẠN CODE MỚI ---
@@ -487,6 +507,47 @@ namespace LogicBusiness.Service
             if (string.IsNullOrWhiteSpace(text)) return false;
             var t = text.ToLowerInvariant();
             return t.Contains("space") || t.Contains("không gian") || t.Contains("workspace") || t.Contains("dự án");
+        }
+
+        // LogicBusiness/Service/ChatService.cs
+
+        public async Task<string> ProcessPublicChatAsync(string message, string sessionId)
+        {
+            // 1. Tìm kiếm thông tin trong Knowledge Base (RAG)
+            // Để AI biết TaskFlow là gì, giá bao nhiêu, tính năng thế nào...
+            var knowledge = await _knowledgeRepository.SearchAsync(message, take: 2);
+
+            // 2. Xây dựng Prompt cho vai trò "Sales/Support"
+            var sb = new StringBuilder();
+            sb.AppendLine("SYSTEM: Bạn là Trợ lý ảo hỗ trợ khách hàng của TaskFlow (Hệ thống quản lý công việc).");
+            sb.AppendLine("NHIỆM VỤ: Trả lời câu hỏi của khách ghé thăm website về tính năng, giá cả, cách đăng ký.");
+            sb.AppendLine("QUY TẮC:");
+            sb.AppendLine("- Giọng điệu thân thiện, chuyên nghiệp, mời gọi khách đăng ký dùng thử.");
+            sb.AppendLine("- Chỉ trả lời dựa trên [THÔNG TIN SẢN PHẨM] bên dưới. Nếu không biết thì bảo khách liên hệ email support@taskflow.com.");
+            sb.AppendLine("- KHÔNG được bịa đặt tính năng không có.");
+            sb.AppendLine();
+
+            sb.AppendLine("[THÔNG TIN SẢN PHẨM / KNOWLEDGE BASE]");
+            if (knowledge != null && knowledge.Any())
+            {
+                foreach (var k in knowledge)
+                {
+                    sb.AppendLine($"- {k.Content}");
+                }
+            }
+            else
+            {
+                sb.AppendLine("- TaskFlow là ứng dụng quản lý dự án giúp tối ưu hiệu suất làm việc nhóm.");
+                sb.AppendLine("- Các tính năng chính: Tạo task, Chat nhóm, Báo cáo tiến độ, Kanban Board.");
+            }
+
+            sb.AppendLine();
+            sb.AppendLine($"Khách hỏi: {message}");
+            sb.AppendLine("Trả lời:");
+
+            // 3. Gọi Gemini AI
+            var response = await _model.GenerateContent(sb.ToString());
+            return response?.Text ?? "Xin lỗi, hiện tại tôi đang quá tải. Vui lòng thử lại sau.";
         }
     }
 }
