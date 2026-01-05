@@ -14,6 +14,9 @@ namespace LogicBusiness.UseCase
 
         Task ForgotPasswordAsync(string email);
         Task ResetPasswordAsync(Guid token, string newPassword);
-    }
 
+        Task<bool> ChangePasswordAsync(string userId, ChangePasswordDto dto);
+    }
 }
+
+

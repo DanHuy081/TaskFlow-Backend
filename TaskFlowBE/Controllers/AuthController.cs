@@ -105,5 +105,29 @@ namespace TaskFlowBE.Controllers
 
             return Ok("Đổi mật khẩu thành công");
         }
+
+        [HttpPost("change-password")]
+        [Authorize] // Bắt buộc phải có Token (đã đăng nhập)
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+        {
+            try
+            {
+                // Lấy UserId từ Token (ClaimTypes.NameIdentifier)
+                // User.FindFirst(...) là cách lấy thông tin từ token người đang đăng nhập
+                var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                    return Unauthorized("Không xác định được người dùng.");
+
+                await _auth.ChangePasswordAsync(userId, dto);
+
+                return Ok(new { message = "Đổi mật khẩu thành công!" });
+            }
+            catch (Exception ex)
+            {
+                // Trả về lỗi để Frontend hiển thị (ví dụ: Sai mật khẩu cũ)
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }
