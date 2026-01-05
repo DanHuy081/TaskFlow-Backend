@@ -18,8 +18,6 @@ namespace LogicBusiness.Repository
         Task<UserFL?> GetByUsernameAsync(string username);
         Task<UserFL?> GetByEmailAsync(string email);
         Task CreateAsync(UserFL user);
-
-       
         Task<UserFL> GetByResetTokenAsync(Guid token);
         
     }

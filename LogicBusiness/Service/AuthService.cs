@@ -146,5 +146,36 @@ namespace LogicBusiness.Service
 
             await _repo.UpdateAsync(user);
         }
+
+        public async Task<bool> ChangePasswordAsync(string userId, ChangePasswordDto dto)
+        {
+            // 1. Kiểm tra xác nhận mật khẩu (Logic logic đơn giản nên check ngay đầu)
+            if (dto.NewPassword != dto.ConfirmPassword)
+                throw new Exception("Mật khẩu xác nhận không khớp.");
+
+            // 2. Tìm user trong DB
+            var user = await _repo.GetByIdAsync(userId);
+            if (user == null) throw new Exception("Không tìm thấy người dùng.");
+
+            // 3. QUAN TRỌNG: Kiểm tra mật khẩu CŨ có đúng không
+            // Tận dụng hàm private VerifyPasswordHash có sẵn trong class này
+            if (!VerifyPasswordHash(dto.CurrentPassword, user.PasswordHash, user.PasswordSalt))
+            {
+                throw new Exception("Mật khẩu hiện tại không chính xác.");
+            }
+
+            // 4. Tạo Hash và Salt cho mật khẩu MỚI
+            // Tận dụng hàm private CreatePasswordHash có sẵn
+            CreatePasswordHash(dto.NewPassword, out byte[] newHash, out byte[] newSalt);
+
+            // 5. Cập nhật thông tin user
+            user.PasswordHash = newHash;
+            user.PasswordSalt = newSalt;
+
+            // 6. Lưu xuống DB
+            await _repo.UpdateAsync(user);
+
+            return true;
+        }
     }
 }
