@@ -1,4 +1,5 @@
 ﻿using CoreEntities.Model;
+using CoreEntities.Model.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,5 +17,9 @@ namespace LogicBusiness.Repository
         Task AddAsync(TeamMember member);
         Task UpdateAsync(TeamMember member);
         Task DeleteAsync(string teamId, string userId);
+
+        Task<TeamRole?> GetUserRoleAsync(string userId, string teamId);
+        Task<TeamMember> GetMemberAsync(string teamId, string userId);
+        Task UpdateMemberAsync(TeamMember member);
     }
 }

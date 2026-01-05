@@ -1,6 +1,9 @@
 ﻿using CoreEntities.Model;
+using CoreEntities.Model.DTOs;
+using LogicBusiness.Service;
 using LogicBusiness.UseCase;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace TaskFlowBE.Controllers
 {
@@ -66,5 +69,31 @@ namespace TaskFlowBE.Controllers
             await _service.DeleteAsync(teamId, userId);
             return NoContent();
         }
+
+        [HttpGet("{teamId}/{userId}/permissions")]
+        public async Task<IActionResult> GetPermissions(string teamId, string userId)
+        {
+            var result = await _service.GetPermissionsAsync(teamId, userId);
+            if (result == null) return NotFound("Member not found");
+
+            return Ok(result); // Lúc này JSON trả về sẽ full field
+        }
+
+        // PUT: api/TeamMember/update-permissions
+        [HttpPut("{teamId}/{userId}/permissions")]
+        public async Task<IActionResult> UpdatePermissions([FromBody] TeamMemberUpdateRoleDto request)
+        {
+            try
+            {
+                var result = await _service.UpdatePermissionsAsync(request);
+                // Trả về luôn object kết quả thay vì chỉ message string
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        
     }
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SqlServer.Data;
 
@@ -11,9 +12,11 @@ using SqlServer.Data;
 namespace SqlServer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260104200422_AddMemberPermissions")]
+    partial class AddMemberPermissions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -813,31 +816,13 @@ namespace SqlServer.Migrations
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("UserId");
 
-                    b.Property<bool>("CanAssignTasks")
+                    b.Property<bool>("CanCreateTask")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("CanChangeTaskPriority")
+                    b.Property<bool>("CanDeleteTask")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("CanChangeTaskStatus")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("CanCommentOnTasks")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("CanCreateTasks")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("CanDeleteTasks")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("CanEditTasks")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("CanSetTaskDueDate")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("CanUploadFiles")
+                    b.Property<bool>("CanEditTask")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("DateJoined")

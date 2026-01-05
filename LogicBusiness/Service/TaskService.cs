@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CoreEntities.Model;
 using CoreEntities.Model.DTOs;
+using CoreEntities.Model.Enums;
 using LogicBusiness.Repository;
 using LogicBusiness.UseCase;
 using System;
@@ -17,14 +18,17 @@ namespace LogicBusiness.Service
         private readonly IActivityService _activityService;
         private readonly IListRepository _listRepository;
         private readonly ISpaceRepository _spaceRepository;
+        private readonly ITeamMemberRepository _teamMemberRepository;
 
-        public TaskService(ITaskRepository taskRepository, IMapper mapper, IActivityService activityService, IListRepository listRepository, ISpaceRepository spaceRepository)
+        public TaskService(ITaskRepository taskRepository, IMapper mapper, IActivityService activityService, IListRepository listRepository, ISpaceRepository spaceRepository, ITeamMemberRepository teamMemberRepository)
         {
             _taskRepository = taskRepository;
             _mapper = mapper;
             _activityService = activityService;
             _listRepository = listRepository;
             _spaceRepository = spaceRepository;
+            _teamMemberRepository = teamMemberRepository;
+
         }
 
         public async Task<IEnumerable<TaskDto>> GetAllTasksAsync()
@@ -80,6 +84,19 @@ namespace LogicBusiness.Service
             string oldName = entity.Name;
             var contextId = await GetTeamIdFromListAsync(entity.ListId);
 
+            var userRole = await _teamMemberRepository.GetUserRoleAsync(userId, contextId.ToString());
+
+            // Nếu là Member:
+            if (userRole == TeamRole.Member)
+            {
+                // Chỉ cho phép nếu chính họ là người tạo Task này
+                if (entity.CreatorId != userId)
+                {
+                    // Nếu không phải người tạo -> CẤM SỬA
+                    throw new UnauthorizedAccessException("⛔ Bạn chỉ có thể cập nhật trạng thái hoặc upload file. Không được sửa thông tin task của người khác!");
+                }
+            }
+
             // 2. Map dữ liệu mới vào entity
             _mapper.Map(dto, entity);
             entity.DateUpdated = DateTime.UtcNow;
@@ -125,6 +142,19 @@ namespace LogicBusiness.Service
             string taskName = entity.Name;
             var contextId = await GetTeamIdFromListAsync(entity.ListId);
 
+            var userRole = await _teamMemberRepository.GetUserRoleAsync(userId, contextId.ToString());
+
+            // 3. CHECK QUYỀN (Logic Phân Quyền nằm ở đây)
+            // Nếu là Member: Chỉ được xóa task do chính mình tạo (CreatorId == userId)
+            // Nếu task do Owner tạo mà Member đòi xóa -> Chặn ngay!
+            if (userRole == TeamRole.Member)
+            {
+                if (entity.CreatorId != userId)
+                {
+                    throw new UnauthorizedAccessException("⛔ Bạn không có quyền xóa công việc của người khác!");
+                }
+            }
+
             // 2. Xóa
             await _taskRepository.DeleteAsync(id);
 
@@ -152,6 +182,7 @@ namespace LogicBusiness.Service
 
             // ✅ SỬA THÀNH (Gọi hàm Helper):
             var contextId = await GetTeamIdFromListAsync(task.ListId);
+            var userRole = await _teamMemberRepository.GetUserRoleAsync(userId, contextId.ToString());
 
             // ... (Phần update và log giữ nguyên) ...
             task.Status = dto.Status;
