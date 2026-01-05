@@ -152,7 +152,12 @@ builder.Services.AddHostedService<DeadlineWorker>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
 builder.Services.AddScoped<IActivityService, ActivityService>();
-
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Dòng này giúp Backend hiểu được cả "Member" lẫn số 2
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 // -------------------------
 // 3. Build App
 // -------------------------

@@ -1,4 +1,6 @@
 ﻿using CoreEntities.Model;
+using CoreEntities.Model.DTOs;
+using CoreEntities.Model.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,5 +18,9 @@ namespace LogicBusiness.UseCase
         Task AddAsync(TeamMember member);
         Task UpdateAsync(TeamMember member);
         Task DeleteAsync(string teamId, string userId);
+
+        Task<TeamRole?> GetUserRoleAsync(string userId, string teamId);
+        Task<TeamMemberUpdateRoleDto> GetPermissionsAsync(string teamId, string userId);
+        Task<TeamMemberUpdateRoleDto> UpdatePermissionsAsync(TeamMemberUpdateRoleDto request);
     }
 }

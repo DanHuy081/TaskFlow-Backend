@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SqlServer.Data;
+using CoreEntities.Model.Enums;
+using CoreEntities.Model.DTOs;
 
 namespace SqlServer
 {
@@ -69,6 +71,40 @@ namespace SqlServer
                 _context.TeamMembers.Remove(member);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public async Task<TeamRole?> GetUserRoleAsync(string userId, string teamId)
+        {
+            // Vì trong DB, TeamId là Guid, nên tham số truyền vào cũng phải là Guid
+            // 2. Tìm thành viên trong DB
+            var member = await _context.TeamMembers
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.UserId == userId && x.TeamId == teamId);
+
+            if (member == null) return null;
+
+            // 3. XỬ LÝ LỖI "Cannot convert string to TeamRole":
+            // Nếu trong DB, cột Role là string, ta phải Parse nó sang Enum
+            if (Enum.TryParse<TeamRole>(member.Role.ToString(), out var roleEnum))
+            {
+                return roleEnum;
+            }
+
+            // Nếu parse thất bại (hoặc lưu sai), mặc định trả về Member
+            return TeamRole.Member;
+        }
+
+        public async Task<TeamMember> GetMemberAsync(string teamId, string userId)
+        {
+            // Vì gộp bảng nên không cần .Include() nữa
+            return await _context.TeamMembers
+                .FirstOrDefaultAsync(m => m.TeamId == teamId && m.UserId == userId);
+        }
+
+        public async Task UpdateMemberAsync(TeamMember member)
+        {
+            _context.TeamMembers.Update(member);
+            await _context.SaveChangesAsync();
         }
     }
 }
