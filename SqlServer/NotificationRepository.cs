@@ -44,5 +44,11 @@ namespace SqlServer
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task CreateAsync(Notification notification)
+        {
+            await _context.Notifications.AddAsync(notification);
+            await _context.SaveChangesAsync();
+        }
     }
 }

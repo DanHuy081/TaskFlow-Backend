@@ -1,4 +1,5 @@
 ﻿using CoreEntities.Model;
+using CoreEntities.Model.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,5 +22,7 @@ namespace LogicBusiness.Repository
 
         Task<IEnumerable<TaskFL>> GetTasksByTeamIdAsync(string teamId, int take = 20);
         Task<IEnumerable<TaskFL>> GetTasksByListIdAsync(string listId, int take = 20);
+
+        Task<List<TaskFL>> SearchTasksAsync(string keyword);
     }
 }

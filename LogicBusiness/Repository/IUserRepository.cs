@@ -19,6 +19,7 @@ namespace LogicBusiness.Repository
         Task<UserFL?> GetByEmailAsync(string email);
         Task CreateAsync(UserFL user);
         Task<UserFL> GetByResetTokenAsync(Guid token);
-        
+
+        Task<List<UserFL>> SearchUsersAsync(string keyword);
     }
 }

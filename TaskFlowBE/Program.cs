@@ -152,6 +152,7 @@ builder.Services.AddHostedService<DeadlineWorker>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
 builder.Services.AddScoped<IActivityService, ActivityService>();
+builder.Services.AddScoped<IMentionService, MentionService>();
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
