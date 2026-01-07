@@ -72,6 +72,14 @@ namespace SqlServer
                 u.IsResetPasswordUsed == false);
         }
 
-    
+        public async Task<List<UserFL>> SearchUsersAsync(string keyword)
+        {
+            // Tìm tương đối theo tên hoặc username, giới hạn 5 kết quả
+            return await _context.UserFLs
+                .Where(u => u.FullName.Contains(keyword) || u.Username.Contains(keyword))
+                .Take(5)
+                .ToListAsync();
+        }
+
     }
 }

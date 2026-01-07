@@ -4,6 +4,7 @@ using LogicBusiness.Service;
 using LogicBusiness.UseCase;
 using CoreEntities.Model.DTOs;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace TaskFlowBE.Controllers
 {
@@ -42,12 +43,12 @@ namespace TaskFlowBE.Controllers
             return Ok(comments);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create(CommentCreateDto dto)
-        {
-            var result = await _service.CreateAsync(dto);
-            return Ok(result);
-        }
+        //[HttpPost]
+        //public async Task<IActionResult> Create(CommentCreateDto dto)
+        //{
+        //    var result = await _service.CreateAsync(dto);
+        //    return Ok(result);
+        //}
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(string id, CommentUpdateDto dto)
@@ -61,6 +62,17 @@ namespace TaskFlowBE.Controllers
         {
             await _service.DeleteCommentAsync(id);
             return NoContent();
+        }
+
+        [HttpPost]
+        [Authorize] // Bắt buộc đăng nhập
+        public async Task<IActionResult> CreateComment([FromBody] CommentCreateDto dto)
+        {
+            // Lấy ID người đang đăng nhập từ Token
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            await _service.AddCommentAsync(dto, userId);
+            return Ok(new { message = "Comment thành công" });
         }
     }
 }

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SqlServer.Data;
+using CoreEntities.Model.DTOs;
 
 namespace SqlServer
 {
@@ -105,6 +106,14 @@ namespace SqlServer
          .OrderByDescending(t => t.DateCreated)
          .Take(take)
          .ToListAsync();
+        }
+
+        public async Task<List<TaskFL>> SearchTasksAsync(string keyword)
+        {
+            return await _context.Tasks
+                .Where(t => t.Name.Contains(keyword))
+                .Take(5)
+                .ToListAsync();
         }
     }
 }

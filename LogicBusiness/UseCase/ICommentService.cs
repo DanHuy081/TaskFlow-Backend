@@ -16,5 +16,7 @@ namespace LogicBusiness.UseCase
         Task<CommentDto> CreateAsync(CommentCreateDto dto);
         Task<CommentDto?> UpdateAsync(string id, CommentUpdateDto dto);
         Task DeleteCommentAsync(string id);
+
+        Task AddCommentAsync(CommentCreateDto dto, string currentUserId);
     }
 }

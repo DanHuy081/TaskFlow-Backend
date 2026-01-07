@@ -12,5 +12,6 @@ namespace LogicBusiness.Repository
         Task<IEnumerable<Notification>> GetByUserIdAsync(Guid userId);
         Task<Notification> AddAsync(Notification notification);
         Task<bool> MarkAsReadAsync(Guid notificationId);
+        Task CreateAsync(Notification notification);
     }
 }
