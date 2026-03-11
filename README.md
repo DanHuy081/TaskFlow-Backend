@@ -30,11 +30,11 @@
 ## 📸 Ảnh chụp màn hình
 
 
-| Tổng quan Dashboard | Bảng Kanban |
+| Tổng quan Dashboard |
 | :---: | :---: |
 | <img width="612" height="374" alt="image" src="https://github.com/user-attachments/assets/96ce2541-4e3e-45e0-aa43-c8eaafa84308" />|
 |<img width="689" height="340" alt="image" src="https://github.com/user-attachments/assets/bce87e27-1689-45eb-b786-a808f6df7b43" />|
-| **Trợ lý AI Chatbot** | **Thảo luận Nhóm (Team Chat)** |
+| **Trợ lý AI Chatbot** |
 | <img width="676" height="445" alt="image" src="https://github.com/user-attachments/assets/5cbed46f-9c2d-44f2-827c-2e8333b5f9e2" />|
 
 ---
