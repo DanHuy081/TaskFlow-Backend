@@ -1,6 +1,3 @@
-<div align="center">
-  <img src="https://via.placeholder.com/150/8B5CF6/FFFFFF?text=TaskFlow+Logo" alt="TaskFlow Logo" width="120" />
-
   # 🚀 TaskFlow: Hệ thống Quản lý Dự án tích hợp AI
 
   **Nền tảng quản lý công việc thông minh, kết hợp giữa quy trình theo dõi truyền thống và Trợ lý ảo AI nhận thức ngữ cảnh.**
