@@ -34,8 +34,7 @@
 | :---: | :---: |
 | <img width="612" height="374" alt="image" src="https://github.com/user-attachments/assets/96ce2541-4e3e-45e0-aa43-c8eaafa84308" />|<img width="689" height="340" alt="image" src="https://github.com/user-attachments/assets/bce87e27-1689-45eb-b786-a808f6df7b43" />
 | **Trợ lý AI Chatbot** |**Lịch** |
-| <img width="676" height="445" alt="image" src="https://github.com/user-attachments/assets/5cbed46f-9c2d-44f2-827c-2e8333b5f9e2" />|<img width="690" height="339" alt="image" src="https://github.com/user-attachments/assets/aaad61ec-61ba-4a66-ae88-08a4fd1f4ea5" />|
-
+| <img width="676" height="445" alt="image" src="https://github.com/user-attachments/assets/5cbed46f-9c2d-44f2-827c-2e8333b5f9e2" />|<img width="690" height="339" alt="image" src="https://github.com/user-attachments/assets/90c0138b-116e-4289-8dc6-d44f61091a82" />|
 
 ---
 
