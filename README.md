@@ -79,19 +79,11 @@ dotnet ef database update
 
 # Khởi chạy server
 dotnet run
-
-# Di chuyển vào thư mục Frontend
-cd ../Frontend
-
-# Cài đặt các thư viện (dependencies)
-npm install
-
-# Cấu hình biến môi trường
-# Tạo một file .env và thêm dòng sau:
-# VITE_API_URL=https://localhost:7041/api
-
-# Khởi chạy server development
-npm run dev
+```
+> 🔗 **Hệ sinh thái TaskFlow:**
+> Dự án này được thiết kế theo kiến trúc tách biệt (Decoupled Architecture).
+> - ⚙️ **Backend Repository (Current):** https://github.com/DanHuy081/TaskFlow-Backend
+> - 🎨 **Frontend Repository:** https://github.com/DanHuy081/TaskFL-FE
 
 🧠 Cơ chế hoạt động của AI (RAG Pipeline)
 Hệ thống AI trong TaskFlow không chỉ gửi chuỗi văn bản thô cho LLM. Quá trình này trải qua các bước RAG:
