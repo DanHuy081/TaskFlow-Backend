@@ -32,13 +32,13 @@
 
 ## 📸 Ảnh chụp màn hình
 
-*(Thay thế các link ảnh dưới đây bằng ảnh chụp thực tế từ dự án của bạn)*
 
 | Tổng quan Dashboard | Bảng Kanban |
 | :---: | :---: |
-| <img src="https://via.placeholder.com/400x250/F3F4F6/8B5CF6?text=Anh+Dashboard" alt="Dashboard" /> | <img src="https://via.placeholder.com/400x250/F3F4F6/8B5CF6?text=Anh+Board" alt="Board" /> |
+| <img width="612" height="374" alt="image" src="https://github.com/user-attachments/assets/96ce2541-4e3e-45e0-aa43-c8eaafa84308" />|
+|<img width="689" height="340" alt="image" src="https://github.com/user-attachments/assets/bce87e27-1689-45eb-b786-a808f6df7b43" />|
 | **Trợ lý AI Chatbot** | **Thảo luận Nhóm (Team Chat)** |
-| <img src="https://via.placeholder.com/400x250/F3F4F6/8B5CF6?text=Anh+AI+Chatbot" alt="AI Bot" /> | <img src="https://via.placeholder.com/400x250/F3F4F6/8B5CF6?text=Anh+Chat" alt="Chat" /> |
+| <img width="676" height="445" alt="image" src="https://github.com/user-attachments/assets/5cbed46f-9c2d-44f2-827c-2e8333b5f9e2" />|
 
 ---
 
@@ -60,9 +60,6 @@
 ---
 
 ## ⚙️ Hướng dẫn cài đặt
-
-Làm theo các bước sau để chạy dự án trên máy tính cá nhân (Localhost).
-
 ### Yêu cầu hệ thống
 - [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 - [Node.js](https://nodejs.org/) (v18 trở lên)
